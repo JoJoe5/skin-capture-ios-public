@@ -41,7 +41,7 @@ public final class SkinCapturePlugin: NSObject, FlutterPlugin {
         let args = arguments as? [String: Any] ?? [:]
         func number(_ key: String, _ fallback: Double) -> Double { (args[key] as? NSNumber)?.doubleValue ?? fallback }
         let config = CaptureConfiguration(
-            minimumFaceHeight: number("minimumFaceHeight", 0.60),
+            minimumFaceHeight: number("minimumFaceHeight", 0.55),
             maximumFaceHeight: number("maximumFaceHeight", 0.80),
             centerTolerance: number("centerTolerance", 0.16), maximumAngle: number("maximumAngle", 0.30),
             minimumBrightness: number("minimumBrightness", 50 / 255),

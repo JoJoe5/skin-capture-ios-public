@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 /// 拍攝設定。亮度為臉部內縮區域的平均 Y 值，正規化為 0～1。
 class CaptureOptions {
   const CaptureOptions({
-    this.minimumFaceHeight = 0.60,
+    this.minimumFaceHeight = 0.55,
     this.maximumFaceHeight = 0.80,
     this.centerTolerance = 0.16,
     this.maximumAngle = 0.30,

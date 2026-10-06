@@ -139,8 +139,10 @@ class _CaptureHomeState extends State<CaptureHome> {
                           onPressed: () => update(() {
                             minimum = 50;
                             maximum = 170;
-                            minimumFace = _defaults.minimumFaceHeight * 100;
-                            maximumFace = _defaults.maximumFaceHeight * 100;
+                            minimumFace = (_defaults.minimumFaceHeight * 100)
+                                .roundToDouble();
+                            maximumFace = (_defaults.maximumFaceHeight * 100)
+                                .roundToDouble();
                           }),
                           child: const Text('恢復預設'),
                         ),

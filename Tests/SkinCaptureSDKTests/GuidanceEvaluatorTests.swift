@@ -86,7 +86,7 @@ final class GuidanceEvaluatorTests: XCTestCase {
 
     func testBriefPoseBrightnessDistanceAndCenterFailuresPauseThenResume() {
         let failures = [face(yaw: 0.31), face(brightness: 0.7),
-                        face(bounds: CGRect(x: 0.25, y: 0.29875, width: 0.5, height: 0.4425)),
+                        face(bounds: CGRect(x: 0.25, y: 0.3175, width: 0.5, height: 0.405)),
                         face(bounds: CGRect(x: 0, y: 0.23875, width: 0.5, height: 0.5625))]
         for failure in failures {
             var evaluator = readyEvaluator()
@@ -152,19 +152,19 @@ final class GuidanceEvaluatorTests: XCTestCase {
         XCTAssertFalse(result.canCapture)
     }
 
-    func testOnlySixtyToEightyPercentGuideHeightsCanBecomeReady() {
-        for height in [0.59, 0.60, 0.65, 0.70, 0.75, 0.80, 0.81] {
+    func testOnlyFiftyFiveToEightyPercentGuideHeightsCanBecomeReady() {
+        for height in [0.54, 0.55, 0.59, 0.60, 0.65, 0.70, 0.75, 0.80, 0.81] {
             var evaluator = GuidanceEvaluator(configuration: .init())
             let measurement = face(bounds: CGRect(x: 0.25, y: 0.52 - height * 0.75 / 2, width: 0.5, height: height * 0.75))
             let first = evaluator.evaluate([measurement], at: 0)
-            let expected: CaptureGuidance = height < 0.60 ? .moveCloser : height > 0.80 ? .moveAway : .holdStill
+            let expected: CaptureGuidance = height < 0.55 ? .moveCloser : height > 0.80 ? .moveAway : .holdStill
             XCTAssertEqual(first.guidance, expected, "引導框高度占比：\(height)")
-            XCTAssertEqual(first.quality.size, (0.60...0.80).contains(height) ? .passed : .failed)
+            XCTAssertEqual(first.quality.size, (0.55...0.80).contains(height) ? .passed : .failed)
             XCTAssertEqual(first.quality.lighting, .passed)
             XCTAssertEqual(first.quality.angle, .passed)
             _ = evaluator.evaluate([measurement], at: 0.2)
             _ = evaluator.evaluate([measurement], at: 0.4)
-            XCTAssertEqual(evaluator.evaluate([measurement], at: 0.6).canCapture, (0.60...0.80).contains(height))
+            XCTAssertEqual(evaluator.evaluate([measurement], at: 0.6).canCapture, (0.55...0.80).contains(height))
         }
     }
 

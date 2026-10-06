@@ -16,7 +16,7 @@ public struct CaptureConfiguration: Equatable {
     public var jpegQuality: Double
 
     public init(
-        minimumFaceHeight: Double = 0.60,
+        minimumFaceHeight: Double = 0.55,
         maximumFaceHeight: Double = 0.80,
         centerTolerance: Double = 0.16,
         maximumAngle: Double = 0.30,

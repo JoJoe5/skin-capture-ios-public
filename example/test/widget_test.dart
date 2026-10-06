@@ -15,7 +15,7 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async {
       calls++;
-      expect(call.arguments['minimumFaceHeight'], 0.6);
+      expect(call.arguments['minimumFaceHeight'], 0.55);
       expect(call.arguments['maximumFaceHeight'], 0.8);
       return null;
     });
@@ -57,7 +57,7 @@ void main() {
     await tester.pumpAndSettle();
     final slider =
         tester.widget<RangeSlider>(find.byKey(const ValueKey('faceSizeRange')));
-    expect(slider.values, const RangeValues(60, 80));
+    expect(slider.values, const RangeValues(55, 80));
     slider.onChanged!(const RangeValues(55, 75));
     await tester.pump();
     await tester.ensureVisible(find.text('套用'));
@@ -88,11 +88,11 @@ void main() {
     expect(applyButton.onPressed, isNull);
     Navigator.of(tester.element(find.byType(RangeSlider))).pop();
     await tester.pumpAndSettle();
-    expect(find.text('臉大小：60～80% · 調整'), findsOneWidget);
+    expect(find.text('臉大小：55～80% · 調整'), findsOneWidget);
     await tester.tap(find.byTooltip('拍攝設定'));
     await tester.pumpAndSettle();
     expect(tester.widget<RangeSlider>(find.byType(RangeSlider)).values,
-        const RangeValues(60, 80));
+        const RangeValues(55, 80));
     Navigator.of(tester.element(find.byType(RangeSlider))).pop();
     await tester.pumpAndSettle();
   }, variant: TargetPlatformVariant({TargetPlatform.iOS}));
@@ -117,7 +117,7 @@ void main() {
     await tester.tap(find.text('恢復預設'));
     await tester.pump();
     expect(tester.widget<RangeSlider>(find.byType(RangeSlider)).values,
-        const RangeValues(60, 80));
+        const RangeValues(55, 80));
     expect(tester.widget<Slider>(find.byType(Slider).first).value, 50);
     expect(tester.widget<Slider>(find.byType(Slider).last).value, 170);
     await tester.tap(find.text('套用'));
@@ -125,7 +125,7 @@ void main() {
     await tester.ensureVisible(find.text('開始拍攝'));
     await tester.tap(find.text('開始拍攝'));
     await tester.pumpAndSettle();
-    expect(capturedOptions!['minimumFaceHeight'], 0.6);
+    expect(capturedOptions!['minimumFaceHeight'], 0.55);
     expect(capturedOptions!['maximumFaceHeight'], 0.8);
     expect(capturedOptions!['minimumBrightness'], closeTo(50 / 255, 0.0001));
     expect(capturedOptions!['maximumBrightness'], closeTo(170 / 255, 0.0001));

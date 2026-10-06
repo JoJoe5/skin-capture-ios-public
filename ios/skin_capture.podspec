@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'skin_capture'
-  s.version = '0.1.5'
+  s.version = '0.1.6'
   s.summary = 'iPhone 正臉相機拍攝引導與 JPEG 回傳。'
   s.description = '提供原生相機 UI、臉部姿勢與亮度引導、自動拍攝及 Flutter 串接介面。'
   s.homepage = 'https://github.com/JoJoe5/skin-capture-ios-public'

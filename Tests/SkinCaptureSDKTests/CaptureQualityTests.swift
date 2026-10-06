@@ -35,7 +35,7 @@ final class CaptureQualityTests: XCTestCase {
 
     func testBoundariesAreInclusiveAndNonFiniteValuesNeverPass() {
         let configuration = CaptureConfiguration()
-        for measurement in [face(height: 0.6 * 0.75, yaw: 0.3, brightness: configuration.minimumBrightness),
+        for measurement in [face(height: 0.55 * 0.75, yaw: 0.3, brightness: configuration.minimumBrightness),
                             face(height: 0.8 * 0.75, roll: -0.3, brightness: configuration.maximumBrightness)] {
             XCTAssertEqual(CaptureQuality.measure([measurement], configuration: configuration),
                            CaptureQuality(lighting: .passed, angle: .passed, size: .passed))
@@ -63,7 +63,7 @@ final class CaptureQualityTests: XCTestCase {
         XCTAssertEqual(result.guidance, .faceForward)
         XCTAssertFalse(result.canCapture)
         XCTAssertEqual(result.quality, CaptureQuality(lighting: .passed, angle: .failed, size: .passed))
-        let darker = FaceMeasurement(bounds: face(height: 0.59 * 0.75).bounds, yaw: nil, roll: nil, pitch: nil,
+        let darker = FaceMeasurement(bounds: face(height: 0.54 * 0.75).bounds, yaw: nil, roll: nil, pitch: nil,
                                      brightness: 0.1, poseReliable: false)
         XCTAssertEqual(evaluator.evaluate([darker], at: 1.0).quality,
                        CaptureQuality(lighting: .failed, angle: .failed, size: .failed))
@@ -78,7 +78,7 @@ final class CaptureQualityTests: XCTestCase {
     func testFaceSizeUsesHeightIndependentlyOfWidth() {
         for width in [0.3, 0.5, 0.7] {
             XCTAssertEqual(CaptureQuality.measure([face(height: 0.75 * 0.75, width: width)], configuration: .init()).size, .passed)
-            XCTAssertEqual(CaptureQuality.measure([face(height: 0.59 * 0.75, width: width)], configuration: .init()).size, .failed)
+            XCTAssertEqual(CaptureQuality.measure([face(height: 0.54 * 0.75, width: width)], configuration: .init()).size, .failed)
         }
     }
 }

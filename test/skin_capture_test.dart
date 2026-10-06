@@ -29,7 +29,7 @@ void main() {
       expect(call.method, 'capture');
       expect(call.arguments['countdownDuration'], 1);
       expect(call.arguments['stableDuration'], 0.6);
-      expect(call.arguments['minimumFaceHeight'], 0.6);
+      expect(call.arguments['minimumFaceHeight'], 0.55);
       expect(call.arguments['maximumFaceHeight'], 0.8);
       expect(call.arguments['minimumBrightness'], closeTo(50 / 255, 0.0001));
       expect(call.arguments['maximumImageDimension'], 2048);

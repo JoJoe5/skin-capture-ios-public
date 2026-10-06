@@ -32,16 +32,16 @@ final class CapturePreviewGeometryTests: XCTestCase {
                          CGRect(x: 0, y: 0, width: 398, height: 497.5)] {
             for size in [CGSize(width: 1080, height: 1440), CGSize(width: 1080, height: 1920)] {
                 let image = CapturePreviewGeometry.imageRect(in: viewport, imageSize: size)
-                for fraction in [0.59, 0.60, 0.65, 0.70, 0.75, 0.80, 0.81] {
+                for fraction in [0.54, 0.55, 0.59, 0.60, 0.65, 0.70, 0.75, 0.80, 0.81] {
                     let height = fraction * 0.75
                     let bounds = CGRect(x: 0.25, y: 0.52 - height / 2, width: 0.5, height: height)
                     XCTAssertEqual(bounds.height * image.height / viewport.height, fraction, accuracy: 0.0001)
                     let face = FaceMeasurement(bounds: bounds, yaw: 0, roll: 0, pitch: 0, brightness: 0.45)
                     var evaluator = GuidanceEvaluator(configuration: .init())
                     let first = evaluator.evaluate([face], at: 0)
-                    let passes = (0.60...0.80).contains(fraction)
+                    let passes = (0.55...0.80).contains(fraction)
                     XCTAssertEqual(first.quality.size, passes ? .passed : .failed)
-                    XCTAssertEqual(first.guidance, fraction < 0.60 ? .moveCloser : fraction > 0.80 ? .moveAway : .holdStill)
+                    XCTAssertEqual(first.guidance, fraction < 0.55 ? .moveCloser : fraction > 0.80 ? .moveAway : .holdStill)
                     for time in [0.2, 0.4] { _ = evaluator.evaluate([face], at: time) }
                     XCTAssertEqual(evaluator.evaluate([face], at: 0.6).canCapture, passes)
                 }
