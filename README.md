@@ -26,7 +26,7 @@
 dependencies:
   skin_capture:
     git:
-      url: git@github.com:JoJoe5/skin-capture-ios-public.git
+      url: https://github.com/JoJoe5/skin-capture-ios-public.git
       ref: main # 驗收後建議改固定版本標籤或 commit
 ```
 
@@ -105,4 +105,4 @@ cd example && flutter test
 
 ## 公開與簽章資料
 
-此副本的公開範圍與待完成驗證請見 [公開版本準備與驗收](docs/PUBLICATION_PLAN.md)。簽章流程不提供公開 IPA 下載；iPhone Demo 透過 TestFlight 安裝。
+此 repo 的公開範圍與驗證結果請見 [公開版本準備與驗收](docs/PUBLICATION_PLAN.md)。簽章流程不提供公開 IPA 下載；iPhone Demo 透過 TestFlight 安裝。
