@@ -1,0 +1,121 @@
+name: iOS SDK 與 Flutter Demo 建置
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  native-sdk:
+    name: 原生 SDK 測試與 XCFramework
+    runs-on: macos-15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: 準備 XcodeGen
+        run: |
+          xcodebuild -version
+          command -v xcodegen || brew install xcodegen
+      - name: Swift Package 核心測試
+        run: swift test
+      - name: iOS 模擬器測試
+        run: |
+          mkdir -p build/native
+          xcodegen generate --spec native-project.yml --project build/native
+          DEVICE_ID=$(python3 scripts/select-simulator.py)
+          xcodebuild test -project build/native/SkinCaptureSDK.xcodeproj \
+            -scheme SkinCaptureSDK -destination "platform=iOS Simulator,id=$DEVICE_ID" \
+            -resultBundlePath build/NativeTests.xcresult CODE_SIGNING_ALLOWED=NO
+      - name: 匯出原生介面預覽
+        continue-on-error: true
+        run: xcrun xcresulttool export attachments --path build/NativeTests.xcresult --output-path build/ui-preview
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SDK-原生介面預覽
+          path: build/ui-preview
+          if-no-files-found: warn
+          retention-days: 14
+      - name: 封裝 SDK
+        run: bash scripts/build-sdk.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SkinCaptureSDK-XCFramework
+          path: build/SkinCaptureSDK.xcframework.zip
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 原生測試紀錄
+          path: build/NativeTests.xcresult
+          retention-days: 14
+  flutter-demo:
+    name: Flutter 串接與 Demo
+    runs-on: macos-15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: 準備 Flutter 3.47.6
+        run: |
+          xcodebuild -version
+          git clone --depth 1 --branch 3.47.6 https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+      - name: 驗證簽章紀錄與產物隱私
+        run: python3 -m unittest discover -s scripts -p 'test_*.py'
+      - name: 安裝相依套件
+        run: |
+          flutter --version
+          flutter pub get
+          cd example
+          flutter pub get
+      - name: 格式、靜態分析與測試
+        run: |
+          dart format --output=none --set-exit-if-changed lib test example/lib example/test
+          flutter analyze
+          flutter test
+          cd example
+          flutter test
+      - name: 建置模擬器 Demo
+        working-directory: example
+        run: flutter build ios --simulator --debug
+      - name: 建置 iPhone Demo
+        working-directory: example
+        run: flutter build ios --release --no-codesign
+      - name: 啟動 Demo 並擷取畫面
+        timeout-minutes: 5
+        continue-on-error: true
+        run: |
+          DEVICE_ID=$(python3 scripts/select-simulator.py)
+          xcrun simctl boot "$DEVICE_ID" || true
+          xcrun simctl bootstatus "$DEVICE_ID" -b
+          xcrun simctl install "$DEVICE_ID" example/build/ios/iphonesimulator/Runner.app
+          xcrun simctl launch "$DEVICE_ID" com.jojoe5.skincapture.demo
+          sleep 5
+          xcrun simctl io "$DEVICE_ID" screenshot example/build/ios/demo-simulator.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Demo-模擬器
+          path: example/build/ios/iphonesimulator/Runner.app
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Demo-iPhone-待簽章
+          path: example/build/ios/iphoneos/Runner.app
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Demo-啟動畫面
+          path: example/build/ios/demo-simulator.png
+          if-no-files-found: warn
+          retention-days: 14

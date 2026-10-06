@@ -1,0 +1,6 @@
+# 啟用 Flutter 建議的靜態分析規則。
+include: package:flutter_lints/flutter.yaml
+analyzer:
+  exclude:
+    - build/**
+    - ios/**

@@ -1,0 +1,64 @@
+name: Demo 簽章與 TestFlight
+on:
+  workflow_dispatch:
+    inputs:
+      authentication:
+        description: 上傳 App Store Connect 的認證方式
+        type: choice
+        options: [app_password, api_key]
+        default: app_password
+        required: true
+      upload_to_testflight:
+        description: 建置完成後上傳至 App Store Connect
+        type: boolean
+        default: false
+        required: true
+      build_number:
+        description: TestFlight 建置編號；同版本每次上傳須增加
+        type: string
+        default: '8'
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: testflight-demo
+  cancel-in-progress: false
+jobs:
+  demo:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' && github.repository_owner == 'JoJoe5'
+    runs-on: macos-15
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: 準備 Flutter 3.47.6
+        run: |
+          xcodebuild -version
+          git clone --depth 1 --branch 3.47.6 https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+      - name: 安裝與測試
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
+          cd example
+          flutter pub get
+          flutter test
+      - name: 簽章驗證與 TestFlight 上傳
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APP_BUNDLE_ID: ${{ secrets.APP_BUNDLE_ID || 'com.jojoe5.skincapture.demo' }}
+          IOS_DISTRIBUTION_P12_BASE64: ${{ secrets.IOS_DISTRIBUTION_P12_BASE64 }}
+          IOS_DISTRIBUTION_P12_PASSWORD: ${{ secrets.IOS_DISTRIBUTION_P12_PASSWORD }}
+          IOS_APPSTORE_PROFILE_BASE64: ${{ secrets.IOS_APPSTORE_PROFILE_BASE64 }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_PRIVATE_KEY_BASE64: ${{ secrets.ASC_PRIVATE_KEY_BASE64 }}
+          ASC_AUTH_METHOD: ${{ inputs.authentication }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          ASC_PROVIDER: ${{ secrets.ASC_PROVIDER }}
+          UPLOAD_TO_TESTFLIGHT: ${{ inputs.upload_to_testflight }}
+          BUILD_NUMBER: ${{ inputs.build_number }}
+        run: python3 scripts/testflight.py
