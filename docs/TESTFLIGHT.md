@@ -1,6 +1,6 @@
 # Demo 安裝與 TestFlight 設定
 
-預備公開 repo 為 `JoJoe5/skin-capture-ios-public`；建立前請先完成公開檢查。Demo 預設 Bundle ID 為 `com.jojoe5.skincapture.demo`，實際註冊資訊以 Secrets 提供，不寫入原始碼。
+公開 repo 為 `JoJoe5/skin-capture-ios-public`，已完成原始碼、建置紀錄及公開產物檢查。Demo 預設 Bundle ID 為 `com.jojoe5.skincapture.demo`，實際註冊資訊以 Secrets 提供，不寫入原始碼。
 
 ## 準備 App 與簽章
 

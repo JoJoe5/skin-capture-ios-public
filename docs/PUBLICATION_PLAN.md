@@ -4,7 +4,7 @@
 
 此副本從版本 0.1.5 的已追蹤檔案匯出，保留臉大小預設 60～80%、Demo 微調設定及目前 SDK 功能。公開 repo 為 `JoJoe5/skin-capture-ios-public`，使用新的初始提交，避免帶入舊的歷史與建置紀錄。
 
-原有私人 repo 已建立本機 Git 歷史備份；待公開版建置與 TestFlight 上傳驗證後移除舊遠端。本 repo 不包含舊提交、舊 Actions 紀錄與已簽章 IPA；作者採 GitHub noreply 信箱。
+原有私人 repo 已建立本機 Git 歷史備份，並在公開版建置與 TestFlight 上傳驗證後移除舊遠端。本 repo 不包含舊提交、舊 Actions 紀錄與已簽章 IPA；作者採 GitHub noreply 信箱。
 
 ## 對外資料
 
@@ -22,7 +22,7 @@
 4. 公開後，先用不讀取簽章 Secrets 的一般 CI 驗證 macOS 建置與公開產物。
 5. 通過檢查後才設定簽章 Secrets，執行 TestFlight 0.1.5 的建置 8；上傳後再確認公開紀錄與產物沒有團隊資料。
 
-實際 macOS 簽章流程仍需新 repo 的 CI 驗證，本機測試使用模擬工具輸出，不能取代 Apple 簽章及上傳的實測。本機備份不推送至公開 repo。
+實際 macOS 簽章流程已由新 repo 的 CI 驗證；本機隱私測試使用模擬工具輸出，另外驗證失敗與清理路徑。本機備份不推送至公開 repo。
 
 ## 本機驗證結果（2026-10-06）
 
@@ -33,4 +33,6 @@
 - SDK 原生程式碼、Flutter 拍攝介面及 Demo 功能與原版本一致。
 - 公開 repo 的 macOS CI 已通過：原生測試、XCFramework、Flutter 測試、模擬器及 iPhone 未簽章建置。
 - 兩個 CI 工作的公開紀錄與 XCFramework 掃描未發現實際公司名稱、網域、Team ID 或私鑰。
-- 真正的 TestFlight 上傳與舊遠端移除尚待完成。
+- TestFlight 工作流程已成功上傳 0.1.5（建置 8）至 App Store Connect；公開上傳紀錄掃描未發現實際公司名稱、網域、Team ID 或私鑰，且沒有公開簽章產物。
+- 舊私人 repo 已移除，GitHub API 確認舊 repo 回傳 404，公開 repo 仍可存取。
+- Apple 處理完成並加入測試群組後，可從原本的 TestFlight Demo 更新；不需要建立另一個 App。
