@@ -225,12 +225,14 @@ public final class SkinCaptureViewController: UIViewController {
             sourceImageSize = imageSize
             view.setNeedsLayout()
         }
-        qualityView.update(evaluation.quality)
+        qualityView.update(evaluation.quality, yawDegrees: evaluation.yawDegrees,
+                           targetYawDegrees: configuration.targetYawDegrees, poseReliable: evaluation.poseReliable)
         outlines.forEach { $0.strokeColor = (evaluation.canCapture ? appearance.accentColor : UIColor(white: 0.32, alpha: 1)).cgColor }
-        setHint(evaluation.blockingGuidance ?? evaluation.guidance, yawDegrees: evaluation.yawDegrees)
+        setHint(evaluation.blockingGuidance ?? evaluation.guidance, yawDegrees: evaluation.yawDegrees,
+                poseReliable: evaluation.poseReliable)
     }
 
-    private func setHint(_ guidance: CaptureGuidance, yawDegrees: Double? = nil) {
+    private func setHint(_ guidance: CaptureGuidance, yawDegrees: Double? = nil, poseReliable: Bool = false) {
         let hint: (String, String)
         let target = String(format: "%+.0f", configuration.targetYawDegrees)
         switch guidance {
@@ -242,7 +244,11 @@ public final class SkinCaptureViewController: UIViewController {
         case .moveAway: hint = ("距離太近", "遠一點")
         case .centerFace: hint = ("臉部未置中", "移到橢圓中央")
         case .faceForward:
-            if configuration.targetYawDegrees == 0 {
+            if yawDegrees == nil {
+                hint = ("角度尚未辨識", "先面向鏡頭，再慢慢轉頭至 \(target)°")
+            } else if !poseReliable {
+                hint = ("角度尚待確認", "保持臉部清楚，慢慢轉頭至 \(target)°")
+            } else if configuration.targetYawDegrees == 0 {
                 hint = ("臉部角度不正", "面向鏡頭，保持頭部端正")
             } else {
                 let current = yawDegrees.map { "目前 \(String(format: "%+.0f", $0))°；" } ?? ""

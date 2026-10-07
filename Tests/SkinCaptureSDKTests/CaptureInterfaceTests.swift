@@ -8,11 +8,29 @@ final class CaptureInterfaceTests: XCTestCase {
     func testSidePoseHintUsesConfiguredTargetAndCurrentMeasurement() {
         let controller = SkinCaptureViewController(configuration: .init(targetYawDegrees: 45)) { _ in }
         controller.loadViewIfNeeded()
-        controller.renderGuidance(GuidanceEvaluation(guidance: .faceForward, progress: 0, yawDegrees: 12))
+        controller.renderGuidance(GuidanceEvaluation(guidance: .faceForward, progress: 0, yawDegrees: 12, poseReliable: true))
         XCTAssertEqual(controller.guidanceLabel.text, "請調整臉部角度")
         XCTAssertEqual(controller.detailLabel.text, "目前 +12°；目標 +45°，保持頭部端正")
         controller.renderGuidance(GuidanceEvaluation(guidance: .noFace, progress: 0))
         XCTAssertEqual(controller.detailLabel.text, "請將臉部放入框內，目標轉頭 +45°")
+    }
+
+    @MainActor
+    func testAngleRemainsVisibleDuringOtherGuidanceAndClearsWhenMissing() {
+        let controller = SkinCaptureViewController(configuration: .init(targetYawDegrees: 16)) { _ in }
+        controller.loadViewIfNeeded()
+        for guidance in [CaptureGuidance.moveAway, .moreLight, .holdStill, .ready] {
+            controller.renderGuidance(GuidanceEvaluation(guidance: guidance, progress: 0,
+                yawDegrees: 12, poseReliable: true))
+            XCTAssertEqual(controller.qualityView.angle.accessibilityHint, "目前 +12 度，目標 +16 度")
+        }
+        controller.renderGuidance(GuidanceEvaluation(guidance: .faceForward, progress: 0,
+            yawDegrees: 12, poseReliable: false))
+        XCTAssertEqual(controller.guidanceLabel.text, "角度尚待確認")
+        XCTAssertEqual(controller.qualityView.angle.accessibilityHint, "目前估計 +12 度，目標 +16 度")
+        controller.renderGuidance(GuidanceEvaluation(guidance: .faceForward, progress: 0))
+        XCTAssertEqual(controller.guidanceLabel.text, "角度尚未辨識")
+        XCTAssertEqual(controller.qualityView.angle.accessibilityHint, "目前角度尚未辨識，目標 +16 度")
     }
 
     @MainActor
@@ -24,7 +42,8 @@ final class CaptureInterfaceTests: XCTestCase {
                                                                left: 0, bottom: size.height > 700 ? 34 : 0, right: 0)
             controller.view.frame = CGRect(origin: .zero, size: size)
             controller.renderGuidance(GuidanceEvaluation(guidance: .moveCloser, progress: 0,
-                quality: CaptureQuality(lighting: .passed, angle: .passed, size: .failed)))
+                quality: CaptureQuality(lighting: .passed, angle: .passed, size: .failed),
+                yawDegrees: -45, poseReliable: true))
             controller.view.layoutIfNeeded()
             XCTAssertGreaterThan(controller.cameraViewport.frame.width, size.width * 0.7)
             XCTAssertLessThan(controller.qualityView.frame.maxY, controller.cameraViewport.frame.minY)

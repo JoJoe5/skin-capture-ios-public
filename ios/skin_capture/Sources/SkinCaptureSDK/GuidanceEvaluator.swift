@@ -27,10 +27,11 @@ struct GuidanceEvaluation {
     let blockingGuidance: CaptureGuidance?
     let sourceImageSize: CGSize?
     let yawDegrees: Double?
+    let poseReliable: Bool
 
     init(guidance: CaptureGuidance, progress: Double, canCapture: Bool? = nil,
          quality: CaptureQuality = .unknown, blockingGuidance: CaptureGuidance? = nil,
-         sourceImageSize: CGSize? = nil, yawDegrees: Double? = nil) {
+         sourceImageSize: CGSize? = nil, yawDegrees: Double? = nil, poseReliable: Bool = false) {
         self.guidance = guidance
         self.progress = progress
         self.canCapture = canCapture ?? (guidance == .ready)
@@ -38,6 +39,7 @@ struct GuidanceEvaluation {
         self.blockingGuidance = blockingGuidance
         self.sourceImageSize = sourceImageSize
         self.yawDegrees = yawDegrees
+        self.poseReliable = poseReliable
     }
 }
 
@@ -66,12 +68,15 @@ struct GuidanceEvaluator {
                            sourceImageSize: CGSize? = nil) -> GuidanceEvaluation {
         let quality = timestamp.isFinite ? CaptureQuality.measure(faces, configuration: configuration) : .unknown
         let result = evaluateGuidance(faces, at: timestamp)
-        let yawDegrees: Double? = timestamp.isFinite && faces.count == 1 && faces[0].poseReliable
+        // 當下可用的角度供引導顯示；快門資格仍由可靠姿態獨立判定。
+        let hasMeasurement = configuration.isValid && timestamp.isFinite && faces.count == 1 && quality != .unknown
+        let yawDegrees: Double? = hasMeasurement
             ? faces[0].yaw.flatMap { $0.isFinite ? $0 * 180 / .pi : nil } : nil
         return GuidanceEvaluation(guidance: result.guidance, progress: result.progress,
                                   canCapture: result.canCapture, quality: quality,
                                   blockingGuidance: result.blockingGuidance, sourceImageSize: sourceImageSize,
-                                  yawDegrees: yawDegrees)
+                                  yawDegrees: yawDegrees,
+                                  poseReliable: hasMeasurement && faces[0].poseReliable)
     }
 
     private mutating func evaluateGuidance(_ faces: [FaceMeasurement], at timestamp: TimeInterval) -> GuidanceEvaluation {

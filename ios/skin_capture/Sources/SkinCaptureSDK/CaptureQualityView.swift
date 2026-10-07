@@ -24,6 +24,8 @@ final class CaptureQualityBadge: UIView {
         label.font = .preferredFont(forTextStyle: .subheadline)
         label.adjustsFontForContentSizeCategory = true
         label.textAlignment = .center
+        label.adjustsFontSizeToFitWidth = true
+        label.minimumScaleFactor = 0.7
         label.translatesAutoresizingMaskIntoConstraints = false
         statusLabel.font = .systemFont(ofSize: 12)
         statusLabel.textAlignment = .center
@@ -74,6 +76,22 @@ final class CaptureQualityBadge: UIView {
             statusLabel.text = "需調整"
         }
     }
+
+    /// 數字固定在角度欄，避免被距離、光線或倒數提示蓋掉。
+    func updateAngle(_ state: CaptureQualityState, yawDegrees: Double?, target: Double, reliable: Bool) {
+        update(state)
+        let targetText = String(format: "%+.0f", target)
+        if let yawDegrees, yawDegrees.isFinite {
+            let current = String(format: "%+.0f", yawDegrees)
+            label.text = "臉角度 \(current)°"
+            if !reliable { statusLabel.text = "估計，待確認" }
+            accessibilityHint = "目前\(reliable ? "" : "估計") \(current) 度，目標 \(targetText) 度"
+        } else {
+            label.text = name
+            statusLabel.text = "角度待辨識"
+            accessibilityHint = "目前角度尚未辨識，目標 \(targetText) 度"
+        }
+    }
 }
 
 final class CaptureQualityView: UIStackView {
@@ -93,9 +111,10 @@ final class CaptureQualityView: UIStackView {
     @available(*, unavailable)
     required init(coder: NSCoder) { fatalError("請使用程式建立狀態列") }
 
-    func update(_ quality: CaptureQuality) {
+    func update(_ quality: CaptureQuality, yawDegrees: Double? = nil, targetYawDegrees: Double = 0,
+                poseReliable: Bool = false) {
         lighting.update(quality.lighting)
-        angle.update(quality.angle)
+        angle.updateAngle(quality.angle, yawDegrees: yawDegrees, target: targetYawDegrees, reliable: poseReliable)
         size.update(quality.size)
     }
 }

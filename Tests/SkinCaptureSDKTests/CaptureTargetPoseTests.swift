@@ -57,7 +57,11 @@ final class CaptureTargetPoseTests: XCTestCase {
                 XCTAssertEqual(result.quality.angle, .failed)
             }
             var evaluator = GuidanceEvaluator(configuration: config)
-            XCTAssertNil(evaluator.evaluate([face(yaw: yaw, poseReliable: false)], at: 0).yawDegrees)
+            let estimate = evaluator.evaluate([face(yaw: yaw, poseReliable: false)], at: 0)
+            XCTAssertEqual(estimate.yawDegrees ?? 0, target, accuracy: 0.000001)
+            XCTAssertFalse(estimate.poseReliable)
+            XCTAssertFalse(estimate.canCapture)
+            XCTAssertNil(evaluator.evaluate([face(yaw: nil, poseReliable: false)], at: 0.1).yawDegrees)
             XCTAssertNil(evaluator.evaluate([face(yaw: yaw), face(yaw: yaw)], at: 0).yawDegrees)
         }
     }
