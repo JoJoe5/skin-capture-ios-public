@@ -21,7 +21,9 @@ class _Recorder {
   http.BaseRequest? request;
   String body = '';
 
-  PocAnalysisClient client({String token = '', String base = 'https://api.test/skin-analytics'}) =>
+  PocAnalysisClient client(
+          {String token = '',
+          String base = 'https://api.test/skin-analytics'}) =>
       PocAnalysisClient(
         settings: AnalysisSettings(apiBaseUrl: base, pocToken: token),
         client: MockClient.streaming((request, stream) async {
@@ -34,7 +36,8 @@ class _Recorder {
 }
 
 void main() {
-  test('POST /poc/skin-analysis：只送 front（image/jpeg），沒有 Authorization', () async {
+  test('POST /poc/skin-analysis：只送 front（image/jpeg），沒有 Authorization',
+      () async {
     final recorder = _Recorder(() => _json(200, {
           'report': sampleReportJson,
           'report_error': null,
@@ -42,7 +45,9 @@ void main() {
           'elapsed_s': 12.3,
           'azure': {'raw': 'x' * 10},
         }));
-    final result = await recorder.client(base: 'https://api.test/skin-analytics/').analyze(_jpeg);
+    final result = await recorder
+        .client(base: 'https://api.test/skin-analytics/')
+        .analyze(_jpeg);
 
     expect(recorder.request!.method, 'POST');
     expect(recorder.request!.url.toString(),
@@ -124,13 +129,26 @@ void main() {
             'overall': {'score': 40},
             'summary': 's',
             'dimensions': [
-              {'code': 'pores', 'name': '毛孔', 'order': 2, 'score': 80.5, 'explanation': 'e'},
-              {'code': 'wrinkles', 'name': '皺紋', 'order': 1, 'score': 0, 'explanation': 'e'},
+              {
+                'code': 'pores',
+                'name': '毛孔',
+                'order': 2,
+                'score': 80.5,
+                'explanation': 'e'
+              },
+              {
+                'code': 'wrinkles',
+                'name': '皺紋',
+                'order': 1,
+                'score': 0,
+                'explanation': 'e'
+              },
             ],
           },
         }));
     return recorder.client().analyze(_jpeg).then((result) {
-      expect([for (final d in result.report!.dimensions) d.code], ['wrinkles', 'pores']);
+      expect([for (final d in result.report!.dimensions) d.code],
+          ['wrinkles', 'pores']);
       expect(result.report!.dimensions.first.score, 0);
       expect(result.report!.dimensions.last.score, 80.5);
     });

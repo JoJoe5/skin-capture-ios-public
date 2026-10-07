@@ -132,9 +132,7 @@ class _DimensionCard extends StatelessWidget {
                         ?.copyWith(fontWeight: FontWeight.w600)),
               ),
               Text(
-                score == null
-                    ? (dimension.category ?? '—')
-                    : _scoreText(score),
+                score == null ? (dimension.category ?? '—') : _scoreText(score),
                 key: ValueKey('score-${dimension.code}'),
                 style: theme.textTheme.titleMedium
                     ?.copyWith(fontWeight: FontWeight.w700, color: _brand),
@@ -164,8 +162,7 @@ class _DimensionCard extends StatelessWidget {
   }
 
   // 0 是有效分數；整數不顯示小數點，小數保留一位。
-  static String _scoreText(double score) =>
-      score == score.roundToDouble()
-          ? score.round().toString()
-          : score.toStringAsFixed(1);
+  static String _scoreText(double score) => score == score.roundToDouble()
+      ? score.round().toString()
+      : score.toStringAsFixed(1);
 }

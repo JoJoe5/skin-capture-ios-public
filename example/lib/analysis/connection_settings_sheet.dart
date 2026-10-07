@@ -33,8 +33,7 @@ class _ConnectionSettingsSheetState extends State<ConnectionSettingsSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('檢測連線設定',
-                  style: Theme.of(context).textTheme.headlineSmall),
+              Text('檢測連線設定', style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: 8),
               const Text('照片由 Demo 上傳到 staging 測試端點；SDK 本身不會上傳。'
                   '設定只保留在這次執行中。'),

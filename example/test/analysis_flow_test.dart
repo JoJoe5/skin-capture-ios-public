@@ -42,7 +42,9 @@ const _ok = (
   }
 );
 
-Map<String, Object?> _reportError(String code, [List<Object> details = const []]) => {
+Map<String, Object?> _reportError(String code,
+        [List<Object> details = const []]) =>
+    {
       'report': null,
       'report_error': {'code': code, 'message': 'x', 'details': details},
     };
@@ -74,14 +76,17 @@ void _mockCapture(WidgetTester tester) {
   const channel = MethodChannel('com.skincapture/capture');
   final bytes = Uint8List.fromList([0xFF, 0xD8, ..._pixel]);
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-      .setMockMethodCallHandler(channel, (call) async => {
-            'jpegBytes': bytes,
-            'width': 1,
-            'height': 1,
-            'capturedAtMilliseconds': 0,
-            'mimeType': 'image/jpeg',
-          });
-  addTearDown(() => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(
+          channel,
+          (call) async => {
+                'jpegBytes': bytes,
+                'width': 1,
+                'height': 1,
+                'capturedAtMilliseconds': 0,
+                'mimeType': 'image/jpeg',
+              });
+  addTearDown(() => TestDefaultBinaryMessengerBinding
+      .instance.defaultBinaryMessenger
       .setMockMethodCallHandler(channel, null));
 }
 
@@ -164,13 +169,35 @@ void main() {
   });
 
   testWidgets('HTTP 404 說明端點尚未啟用且不提供重試', (tester) async {
-    await _open(tester, _client([(404, {'error': {'code': 'NOT_FOUND', 'message': '', 'details': []}})]));
+    await _open(
+        tester,
+        _client([
+          (
+            404,
+            {
+              'error': {'code': 'NOT_FOUND', 'message': '', 'details': []}
+            }
+          )
+        ]));
     expect(find.text('測試端點尚未啟用'), findsOneWidget);
     expect(find.text('重試'), findsNothing);
   });
 
   testWidgets('HTTP 503 可重試', (tester) async {
-    await _open(tester, _client([(503, {'error': {'code': 'SERVICE_UNAVAILABLE', 'message': '', 'details': []}})]));
+    await _open(
+        tester,
+        _client([
+          (
+            503,
+            {
+              'error': {
+                'code': 'SERVICE_UNAVAILABLE',
+                'message': '',
+                'details': []
+              }
+            }
+          )
+        ]));
     expect(find.text('服務暫時無法使用'), findsOneWidget);
     expect(find.text('重試'), findsOneWidget);
   });
@@ -208,8 +235,11 @@ void main() {
         ),
       ),
     ));
-    expect(tester.widget<Text>(find.byKey(const ValueKey('score-wrinkles'))).data, '0');
-    expect(tester.widget<Text>(find.byKey(const ValueKey('score-pores'))).data, '76.5');
+    expect(
+        tester.widget<Text>(find.byKey(const ValueKey('score-wrinkles'))).data,
+        '0');
+    expect(tester.widget<Text>(find.byKey(const ValueKey('score-pores'))).data,
+        '76.5');
   });
 
   testWidgets('呼叫檢測 API 預設關閉：拍完照只預覽，沒有任何送出入口', (tester) async {
@@ -218,7 +248,10 @@ void main() {
     _mockCapture(tester);
     await tester.pumpWidget(const SkinCaptureDemo());
 
-    expect(tester.widget<Switch>(find.byKey(const ValueKey('callApiSwitch'))).value,
+    expect(
+        tester
+            .widget<Switch>(find.byKey(const ValueKey('callApiSwitch')))
+            .value,
         isFalse);
     await tester.tap(find.text('開始拍攝'));
     await tester.pumpAndSettle();

@@ -105,7 +105,8 @@ class PocResult {
     return PocResult(
       report: report == null ? null : AnalysisReport.fromJson(report),
       error: error == null ? null : AnalysisError.fromJson(error),
-      formalApiWouldAccept: validation is Map ? validation['ok'] as bool? : null,
+      formalApiWouldAccept:
+          validation is Map ? validation['ok'] as bool? : null,
     );
   }
 }

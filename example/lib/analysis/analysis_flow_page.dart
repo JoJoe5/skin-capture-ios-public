@@ -77,8 +77,7 @@ class _AnalysisFlowPageState extends State<AnalysisFlowPage> {
         final reason = error!.hasDetail('MULTIPLE_FACES')
             ? '畫面中偵測到多張臉，請只留一個人再拍。'
             : '照片品質不足（可能無臉、失焦、過暗或被遮擋），請重新拍攝。';
-        return _Failure('照片無法分析', reason,
-            retryLabel: '重新拍攝', retry: _retake);
+        return _Failure('照片無法分析', reason, retryLabel: '重新拍攝', retry: _retake);
       case 'ANALYSIS_UNAVAILABLE':
         // 原照片無法產出完整報告，只顯示原因，不提供原照重試。
         return const _Failure('目前無法產生報告', '這張照片無法產生完整報告，請返回。');

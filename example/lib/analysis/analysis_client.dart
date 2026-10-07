@@ -81,7 +81,8 @@ class PocAnalysisClient {
     try {
       final decoded = jsonDecode(body);
       if (decoded is Map<String, dynamic> && decoded['error'] is Map) {
-        error = AnalysisError.fromJson(decoded['error'] as Map<String, dynamic>);
+        error =
+            AnalysisError.fromJson(decoded['error'] as Map<String, dynamic>);
       }
     } on FormatException {
       // 非 JSON 的錯誤本文（例如 ALB 的 503 頁面）只保留狀態碼。
