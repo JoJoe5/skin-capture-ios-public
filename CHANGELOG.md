@@ -1,5 +1,12 @@
 # 版本紀錄
 
+## 未發布
+
+- Demo 新增肌膚檢測 POC：拍照後可上傳到 skin-analytics 的同步測試端點 `POST /poc/skin-analysis`，並以報告畫面顯示整體分數、摘要與六項分數；SDK 與 plugin 仍不呼叫檢測 API，上傳只在 Demo 內。
+- 首頁新增「呼叫檢測 API」開關，預設關閉；關閉時維持原本只測相機引導的行為，打開後才顯示送出入口與連線設定，且仍需按鈕確認才會上傳。
+- 檢測服務網址與測試權杖由 `--dart-define` 或 Demo 的連線設定提供，只存在記憶體，不進 git；服務未啟用時可用「預覽範例報告」檢視畫面。
+- 補上 `PHOTO_REJECTED`、`ANALYSIS_UNAVAILABLE`、`INVALID_MODEL_OUTPUT` 及 HTTP 401／404／413／422／429／503 的處理與測試；尚未對實際 staging 驗證（端點未啟用），需 iPhone 實機驗收。
+
 ## 0.1.8
 
 - 將目前角度固定顯示於角度欄，避免距離、光線、穩定與倒數提示取代角度數字。

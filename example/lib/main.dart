@@ -3,6 +3,13 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:skin_capture/skin_capture.dart';
 
+import 'analysis/analysis_client.dart';
+import 'analysis/analysis_flow_page.dart';
+import 'analysis/analysis_models.dart';
+import 'analysis/connection_settings_sheet.dart';
+import 'analysis/report_view.dart';
+import 'analysis/sample_report.dart';
+
 void main() => runApp(const SkinCaptureDemo());
 
 class SkinCaptureDemo extends StatelessWidget {
@@ -29,8 +36,12 @@ class CaptureHome extends StatefulWidget {
 class _CaptureHomeState extends State<CaptureHome> {
   static const _defaults = CaptureOptions();
   final _sdk = SkinCapture();
+  final _analysisSettings = AnalysisSettings();
   CaptureResult? _photo;
   bool _capturing = false;
+
+  /// 預設關閉：只測試相機引導，照片不離開手機。
+  bool _callApi = false;
   String? _message;
   double _minimumBrightness = 50;
   double _maximumBrightness = 170;
@@ -69,6 +80,55 @@ class _CaptureHomeState extends State<CaptureHome> {
     } finally {
       if (mounted) setState(() => _capturing = false);
     }
+  }
+
+  Future<bool> _showConnectionSettings() async {
+    final saved = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => ConnectionSettingsSheet(settings: _analysisSettings),
+    );
+    if (mounted) setState(() {});
+    return saved == true && _analysisSettings.isComplete;
+  }
+
+  Future<void> _analyze(CaptureResult photo) async {
+    if (!_callApi) return;
+    if (!_analysisSettings.isComplete && !await _showConnectionSettings()) {
+      if (mounted) setState(() => _message = '請先完成檢測連線設定');
+      return;
+    }
+    if (!mounted) return;
+    final result = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => AnalysisFlowPage(
+          jpeg: photo.jpegBytes,
+          client: PocAnalysisClient(settings: _analysisSettings),
+        ),
+      ),
+    );
+    if (result == retakeResult && mounted) {
+      setState(() => _photo = null);
+      await _capture();
+    }
+  }
+
+  void _previewSampleReport() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => Scaffold(
+          appBar: AppBar(title: const Text('範例報告')),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: AnalysisReportView(
+                report: AnalysisReport.fromJson(sampleReportJson),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _showSettings() async {
@@ -234,6 +294,12 @@ class _CaptureHomeState extends State<CaptureHome> {
       appBar: AppBar(
         title: const Text('肌膚拍攝引導'),
         actions: [
+          if (_callApi)
+            IconButton(
+              onPressed: _capturing ? null : _showConnectionSettings,
+              icon: const Icon(Icons.cloud_outlined),
+              tooltip: '檢測連線設定',
+            ),
           IconButton(
             onPressed: _capturing ? null : _showSettings,
             icon: const Icon(Icons.tune),
@@ -286,6 +352,33 @@ class _CaptureHomeState extends State<CaptureHome> {
                       ),
                     ),
                     Text('目標轉頭角度：${_targetYawDegrees.round()}°'),
+                    const Divider(height: 32),
+                    // 白底卡片內不用 ListTile，避免背景遮住它的點擊效果。
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('呼叫檢測 API',
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium),
+                              const SizedBox(height: 4),
+                              Text(_callApi
+                                  ? '拍完後按「送出肌膚檢測」才會上傳照片。'
+                                  : '關閉：只測試相機引導，照片不會離開手機。'),
+                            ],
+                          ),
+                        ),
+                        Switch(
+                          key: const ValueKey('callApiSwitch'),
+                          value: _callApi,
+                          onChanged: _capturing
+                              ? null
+                              : (on) => setState(() => _callApi = on),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -316,7 +409,20 @@ class _CaptureHomeState extends State<CaptureHome> {
                   '照片保留在這次操作中，可交由 App 接續檢測。',
                   textAlign: TextAlign.center,
                 ),
+                if (_callApi) ...[
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: _capturing ? null : () => _analyze(photo),
+                    icon: const Icon(Icons.analytics_outlined),
+                    label: const Text('送出肌膚檢測'),
+                  ),
+                ],
               ],
+              if (_callApi)
+                TextButton(
+                  onPressed: _previewSampleReport,
+                  child: const Text('預覽範例報告'),
+                ),
             ],
           ),
         ),

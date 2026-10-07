@@ -15,7 +15,7 @@ Flutter 呼叫 `SkinCapture().capture(options: ...)`，SDK 以全螢幕原生畫
 
 回傳欄位為 `jpegBytes`、`width`、`height`、`mimeType`、`capturedAt`。`capturedAt` 為 UTC 拍攝時間。照片方向已烘焙到像素，EXIF orientation 為 1；輸出移除原始照片中繼資料，不裁切臉部。`maximumImageDimension == null` 保留原解析度；有設定則等比例縮小，不放大。
 
-App 需自行處理登入憑證、API 上傳、上傳重試與資料保存。範例不包含 HTTP 相依套件，以免綁定團隊網路架構。上傳時依 API 要求指定 `image/jpeg` 與檔名，例如 `face.jpg`。
+App 需自行處理登入憑證、API 上傳、上傳重試與資料保存。plugin 本身不含 HTTP 相依套件，以免綁定團隊網路架構；Demo 的 `example/lib/analysis/` 另以 `http` 套件示範上傳到 staging 測試端點並顯示報告，僅供參考，不屬於 SDK。上傳時依 API 要求指定 `image/jpeg` 與檔名，例如 `face.jpg`。
 
 ## 設定
 

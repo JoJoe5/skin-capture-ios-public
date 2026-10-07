@@ -9,6 +9,8 @@ dependencies:
     sdk: flutter
   skin_capture:
     path: ../
+  http: ^1.2.2
+  http_parser: ^4.0.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
