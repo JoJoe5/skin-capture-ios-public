@@ -5,6 +5,17 @@ import XCTest
 
 final class CaptureInterfaceTests: XCTestCase {
     @MainActor
+    func testSidePoseHintUsesConfiguredTargetAndCurrentMeasurement() {
+        let controller = SkinCaptureViewController(configuration: .init(targetYawDegrees: 45)) { _ in }
+        controller.loadViewIfNeeded()
+        controller.renderGuidance(GuidanceEvaluation(guidance: .faceForward, progress: 0, yawDegrees: 12))
+        XCTAssertEqual(controller.guidanceLabel.text, "請調整臉部角度")
+        XCTAssertEqual(controller.detailLabel.text, "目前 +12°；目標 +45°，保持頭部端正")
+        controller.renderGuidance(GuidanceEvaluation(guidance: .noFace, progress: 0))
+        XCTAssertEqual(controller.detailLabel.text, "請將臉部放入框內，目標轉頭 +45°")
+    }
+
+    @MainActor
     func testIndicatorsAndOvalDoNotOverlapOnSmallAndLargePhones() {
         for size in [CGSize(width: 375, height: 667), CGSize(width: 390, height: 844), CGSize(width: 430, height: 932)] {
             let controller = SkinCaptureViewController { _ in }

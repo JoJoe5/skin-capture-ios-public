@@ -25,9 +25,11 @@ final class PhotoProcessorTests: XCTestCase {
         let properties = try XCTUnwrap(CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [String: Any])
         XCTAssertEqual(properties[kCGImagePropertyOrientation as String] as? Int, 1)
         XCTAssertNil(properties[kCGImagePropertyGPSDictionary as String])
+        try assertSideColors(result.jpegData)
         let unscaled = try XCTUnwrap(PhotoProcessor.process(input, configuration: .init(maximumImageDimension: 2048)))
         XCTAssertEqual(unscaled.width, 800)
         XCTAssertEqual(unscaled.height, 1200)
+        try assertSideColors(unscaled.jpegData)
         let rotatedData = NSMutableData()
         let destination = try XCTUnwrap(CGImageDestinationCreateWithData(rotatedData,
                                             UTType.jpeg.identifier as CFString, 1, nil))
@@ -41,6 +43,24 @@ final class PhotoProcessorTests: XCTestCase {
 
     func testInvalidDataDoesNotReturnAPhoto() {
         XCTAssertNil(PhotoProcessor.process(Data([0, 1, 2]), configuration: .init()))
+    }
+
+    /// 左紅右藍可偵測真正的左右翻轉，僅檢查 EXIF=1 無法證明像素未鏡像。
+    private func assertSideColors(_ data: Data, file: StaticString = #filePath, line: UInt = #line) throws {
+        let source = try XCTUnwrap(CGImageSourceCreateWithData(data as CFData, nil))
+        let image = try XCTUnwrap(CGImageSourceCreateImageAtIndex(source, 0, nil))
+        let context = try XCTUnwrap(CGContext(data: nil, width: image.width, height: image.height,
+                                             bitsPerComponent: 8, bytesPerRow: image.width * 4,
+                                             space: CGColorSpaceCreateDeviceRGB(),
+                                             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+        context.draw(image, in: CGRect(x: 0, y: 0, width: CGFloat(image.width), height: CGFloat(image.height)))
+        let pixels = try XCTUnwrap(context.data).assumingMemoryBound(to: UInt8.self)
+        let left = (image.height / 2 * image.width + image.width / 4) * 4
+        let right = (image.height / 2 * image.width + image.width * 3 / 4) * 4
+        XCTAssertGreaterThan(pixels[left], 200, file: file, line: line)
+        XCTAssertLessThan(pixels[left + 2], 50, file: file, line: line)
+        XCTAssertLessThan(pixels[right], 50, file: file, line: line)
+        XCTAssertGreaterThan(pixels[right + 2], 200, file: file, line: line)
     }
 }
 #endif

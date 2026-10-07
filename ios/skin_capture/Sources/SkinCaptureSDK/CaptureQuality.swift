@@ -24,11 +24,8 @@ struct CaptureQuality: Equatable {
             (configuration.minimumBrightness...configuration.maximumBrightness).contains(face.brightness) ? .passed : .failed
         let centered = abs(box.midX - 0.5) <= configuration.centerTolerance &&
             abs(box.midY - 0.52) <= configuration.centerTolerance
-        let angles = [face.yaw, face.roll, face.pitch]
-        let angle = complete && face.poseReliable && centered && angles.allSatisfy { value in
-            guard let value else { return false }
-            return value.isFinite && abs(value) <= configuration.maximumAngle
-        }
+        let angle = complete && face.poseReliable && centered &&
+            configuration.acceptsPose(yaw: face.yaw, roll: face.roll, pitch: face.pitch)
         let size = complete && CapturePreviewGeometry.faceHeightRange(configuration: configuration).contains(box.height)
         return CaptureQuality(lighting: lighting,
                               angle: angle ? .passed : .failed,

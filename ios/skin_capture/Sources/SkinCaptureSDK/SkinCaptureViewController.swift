@@ -227,18 +227,27 @@ public final class SkinCaptureViewController: UIViewController {
         }
         qualityView.update(evaluation.quality)
         outlines.forEach { $0.strokeColor = (evaluation.canCapture ? appearance.accentColor : UIColor(white: 0.32, alpha: 1)).cgColor }
-        setHint(evaluation.blockingGuidance ?? evaluation.guidance)
+        setHint(evaluation.blockingGuidance ?? evaluation.guidance, yawDegrees: evaluation.yawDegrees)
     }
 
-    private func setHint(_ guidance: CaptureGuidance) {
+    private func setHint(_ guidance: CaptureGuidance, yawDegrees: Double? = nil) {
         let hint: (String, String)
+        let target = String(format: "%+.0f", configuration.targetYawDegrees)
         switch guidance {
-        case .noFace: hint = ("暫時無法辨識人臉", "請正面面向鏡頭，露出完整臉部")
+        case .noFace:
+            hint = ("暫時無法辨識人臉", configuration.targetYawDegrees == 0
+                ? "請正面面向鏡頭，露出完整臉部" : "請將臉部放入框內，目標轉頭 \(target)°")
         case .multipleFaces: hint = ("請只保留一張臉", "畫面中不要有其他人")
         case .moveCloser: hint = ("距離太遠", "近一點")
         case .moveAway: hint = ("距離太近", "遠一點")
         case .centerFace: hint = ("臉部未置中", "移到橢圓中央")
-        case .faceForward: hint = ("臉部角度不正", "面向鏡頭，保持頭部端正")
+        case .faceForward:
+            if configuration.targetYawDegrees == 0 {
+                hint = ("臉部角度不正", "面向鏡頭，保持頭部端正")
+            } else {
+                let current = yawDegrees.map { "目前 \(String(format: "%+.0f", $0))°；" } ?? ""
+                hint = ("請調整臉部角度", "\(current)目標 \(target)°，保持頭部端正")
+            }
         case .moreLight: hint = ("光線不足", "面向明亮且均勻的光源")
         case .lessLight: hint = ("光線太強", "避開直射光")
         case .holdStill: hint = ("請保持不動", "符合條件後自動拍攝")

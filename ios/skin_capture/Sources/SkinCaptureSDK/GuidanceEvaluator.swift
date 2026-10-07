@@ -26,16 +26,18 @@ struct GuidanceEvaluation {
     let quality: CaptureQuality
     let blockingGuidance: CaptureGuidance?
     let sourceImageSize: CGSize?
+    let yawDegrees: Double?
 
     init(guidance: CaptureGuidance, progress: Double, canCapture: Bool? = nil,
          quality: CaptureQuality = .unknown, blockingGuidance: CaptureGuidance? = nil,
-         sourceImageSize: CGSize? = nil) {
+         sourceImageSize: CGSize? = nil, yawDegrees: Double? = nil) {
         self.guidance = guidance
         self.progress = progress
         self.canCapture = canCapture ?? (guidance == .ready)
         self.quality = quality
         self.blockingGuidance = blockingGuidance
         self.sourceImageSize = sourceImageSize
+        self.yawDegrees = yawDegrees
     }
 }
 
@@ -64,9 +66,12 @@ struct GuidanceEvaluator {
                            sourceImageSize: CGSize? = nil) -> GuidanceEvaluation {
         let quality = timestamp.isFinite ? CaptureQuality.measure(faces, configuration: configuration) : .unknown
         let result = evaluateGuidance(faces, at: timestamp)
+        let yawDegrees: Double? = timestamp.isFinite && faces.count == 1 && faces[0].poseReliable
+            ? faces[0].yaw.flatMap { $0.isFinite ? $0 * 180 / .pi : nil } : nil
         return GuidanceEvaluation(guidance: result.guidance, progress: result.progress,
                                   canCapture: result.canCapture, quality: quality,
-                                  blockingGuidance: result.blockingGuidance, sourceImageSize: sourceImageSize)
+                                  blockingGuidance: result.blockingGuidance, sourceImageSize: sourceImageSize,
+                                  yawDegrees: yawDegrees)
     }
 
     private mutating func evaluateGuidance(_ faces: [FaceMeasurement], at timestamp: TimeInterval) -> GuidanceEvaluation {
@@ -97,7 +102,7 @@ struct GuidanceEvaluator {
               [yaw, roll, pitch].allSatisfy({ $0.isFinite }) else {
             return reject(.faceForward)
         }
-        if [yaw, roll, pitch].contains(where: { abs($0) > configuration.maximumAngle }) {
+        if !configuration.acceptsPose(yaw: yaw, roll: roll, pitch: pitch) {
             return temporarilyReject(.faceForward, at: timestamp)
         }
         guard face.brightness.isFinite else { return reject(.moreLight) }

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:skin_capture/skin_capture.dart';
 
@@ -34,6 +36,8 @@ class _CaptureHomeState extends State<CaptureHome> {
   double _maximumBrightness = 170;
   double _minimumFaceHeight = _defaults.minimumFaceHeight;
   double _maximumFaceHeight = _defaults.maximumFaceHeight;
+  double _targetYawDegrees = _defaults.targetYawDegrees;
+  double _maximumAngle = _defaults.maximumAngle;
 
   Future<void> _capture() async {
     if (_capturing) return;
@@ -46,6 +50,9 @@ class _CaptureHomeState extends State<CaptureHome> {
         options: CaptureOptions(
           minimumFaceHeight: _minimumFaceHeight,
           maximumFaceHeight: _maximumFaceHeight,
+          targetYawDegrees: _targetYawDegrees,
+          maximumAngle: _maximumAngle,
+          title: _targetYawDegrees == 0 ? '正臉拍攝' : '側臉拍攝',
           minimumBrightness: _minimumBrightness / 255,
           maximumBrightness: _maximumBrightness / 255,
         ),
@@ -69,6 +76,8 @@ class _CaptureHomeState extends State<CaptureHome> {
     var maximum = _maximumBrightness;
     var minimumFace = (_minimumFaceHeight * 100).roundToDouble();
     var maximumFace = (_maximumFaceHeight * 100).roundToDouble();
+    var targetYaw = _targetYawDegrees;
+    var angleTolerance = _maximumAngle * 180 / math.pi;
     final saved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
@@ -115,6 +124,7 @@ class _CaptureHomeState extends State<CaptureHome> {
                     const SizedBox(height: 16),
                     Text('亮度下限：${minimum.round()}'),
                     Slider(
+                      key: const ValueKey('minimumBrightness'),
                       value: minimum,
                       min: 0,
                       max: 255,
@@ -123,6 +133,7 @@ class _CaptureHomeState extends State<CaptureHome> {
                     ),
                     Text('亮度上限：${maximum.round()}'),
                     Slider(
+                      key: const ValueKey('maximumBrightness'),
                       value: maximum,
                       min: 0,
                       max: 255,
@@ -133,12 +144,52 @@ class _CaptureHomeState extends State<CaptureHome> {
                       const Text('下限必須小於上限',
                           style: TextStyle(color: Colors.red)),
                     const SizedBox(height: 16),
+                    Text('目標轉頭角度：${targetYaw.round()}°'),
+                    Slider(
+                      key: const ValueKey('targetYaw'),
+                      value: targetYaw,
+                      min: -60,
+                      max: 60,
+                      divisions: 120,
+                      label: '${targetYaw.round()}°',
+                      onChanged: (value) =>
+                          update(() => targetYaw = value.roundToDouble()),
+                    ),
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        for (final angle in [-45.0, 0.0, 45.0])
+                          ChoiceChip(
+                            label: Text(
+                                angle == 0 ? '正面 0°' : '${angle.round()}°'),
+                            selected: targetYaw == angle,
+                            onSelected: (_) => update(() => targetYaw = angle),
+                          ),
+                      ],
+                    ),
+                    const Text('正負代表相反的轉頭方向，拍攝畫面顯示目前角度。'),
+                    Text('角度容許誤差：±${angleTolerance.toStringAsFixed(1)}°'),
+                    Slider(
+                      key: const ValueKey('angleTolerance'),
+                      value: angleTolerance,
+                      min: 3,
+                      max: 30,
+                      divisions: 27,
+                      label: '±${angleTolerance.toStringAsFixed(1)}°',
+                      onChanged: (value) =>
+                          update(() => angleTolerance = value),
+                    ),
+                    const Text('容許目標前後的角度偏差；抬頭與歪頭也使用相同門檻。'),
+                    const SizedBox(height: 16),
                     Row(
                       children: [
                         TextButton(
                           onPressed: () => update(() {
                             minimum = 50;
                             maximum = 170;
+                            targetYaw = _defaults.targetYawDegrees;
+                            angleTolerance =
+                                _defaults.maximumAngle * 180 / math.pi;
                             minimumFace = (_defaults.minimumFaceHeight * 100)
                                 .roundToDouble();
                             maximumFace = (_defaults.maximumFaceHeight * 100)
@@ -170,6 +221,8 @@ class _CaptureHomeState extends State<CaptureHome> {
         _maximumBrightness = maximum;
         _minimumFaceHeight = minimumFace / 100;
         _maximumFaceHeight = maximumFace / 100;
+        _targetYawDegrees = targetYaw;
+        _maximumAngle = angleTolerance * math.pi / 180;
       });
     }
   }
@@ -232,6 +285,7 @@ class _CaptureHomeState extends State<CaptureHome> {
                         '臉大小：${(_minimumFaceHeight * 100).round()}～${(_maximumFaceHeight * 100).round()}% · 調整',
                       ),
                     ),
+                    Text('目標轉頭角度：${_targetYawDegrees.round()}°'),
                   ],
                 ),
               ),

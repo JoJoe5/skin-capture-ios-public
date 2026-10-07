@@ -31,6 +31,7 @@ void main() {
       expect(call.arguments['stableDuration'], 0.6);
       expect(call.arguments['minimumFaceHeight'], 0.55);
       expect(call.arguments['maximumFaceHeight'], 0.8);
+      expect(call.arguments['targetYawDegrees'], 0);
       expect(call.arguments['minimumBrightness'], closeTo(50 / 255, 0.0001));
       expect(call.arguments['maximumImageDimension'], 2048);
       return photo();
@@ -135,8 +136,28 @@ void main() {
       const CaptureOptions(jpegQuality: 2),
       const CaptureOptions(maximumImageDimension: 1),
       const CaptureOptions(title: ''),
+      const CaptureOptions(targetYawDegrees: double.nan),
+      const CaptureOptions(targetYawDegrees: double.infinity),
+      const CaptureOptions(targetYawDegrees: -61),
+      const CaptureOptions(targetYawDegrees: 61),
     ]) {
       expect(options.toMap, throwsArgumentError);
+    }
+  });
+
+  test('正負目標角度及容差完整傳至原生，包含合法上下限', () async {
+    for (final target in [-60.0, -45.0, 0.0, 45.0, 60.0]) {
+      messenger.setMockMethodCallHandler(channel, (call) async {
+        expect(call.arguments['targetYawDegrees'], target);
+        expect(call.arguments['maximumAngle'], closeTo(0.174533, 0.000001));
+        return null;
+      });
+      await SkinCapture().capture(
+        options: CaptureOptions(
+          targetYawDegrees: target,
+          maximumAngle: 0.174533,
+        ),
+      );
     }
   });
 }

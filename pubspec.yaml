@@ -1,6 +1,6 @@
 name: skin_capture
 description: iPhone 正臉相機拍攝引導，提供原生 UI、自動拍照與 JPEG 回傳。
-version: 0.1.6
+version: 0.1.7
 publish_to: none
 repository: https://github.com/JoJoe5/skin-capture-ios-public
 environment:

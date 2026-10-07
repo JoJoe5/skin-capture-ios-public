@@ -6,7 +6,10 @@ public struct CaptureConfiguration: Equatable {
     public var minimumFaceHeight: Double
     public var maximumFaceHeight: Double
     public var centerTolerance: Double
+    /// yaw 與目標的偏差及 pitch／roll 上限，單位為弧度。
     public var maximumAngle: Double
+    /// 目標左右轉頭角度，單位為度；正負沿用非鏡像影像的 Vision yaw。
+    public var targetYawDegrees: Double
     public var minimumBrightness: Double
     public var maximumBrightness: Double
     public var stableDuration: TimeInterval
@@ -20,6 +23,7 @@ public struct CaptureConfiguration: Equatable {
         maximumFaceHeight: Double = 0.80,
         centerTolerance: Double = 0.16,
         maximumAngle: Double = 0.30,
+        targetYawDegrees: Double = 0,
         minimumBrightness: Double = 50.0 / 255.0,
         maximumBrightness: Double = 170.0 / 255.0,
         stableDuration: TimeInterval = 0.6,
@@ -31,6 +35,7 @@ public struct CaptureConfiguration: Equatable {
         self.maximumFaceHeight = maximumFaceHeight
         self.centerTolerance = centerTolerance
         self.maximumAngle = maximumAngle
+        self.targetYawDegrees = targetYawDegrees
         self.minimumBrightness = minimumBrightness
         self.maximumBrightness = maximumBrightness
         self.stableDuration = stableDuration
@@ -45,6 +50,7 @@ public struct CaptureConfiguration: Equatable {
         maximumFaceHeight > minimumFaceHeight && maximumFaceHeight <= 0.95 &&
         centerTolerance.isFinite && (0.01...0.25).contains(centerTolerance) &&
         maximumAngle.isFinite && (0.05...0.6).contains(maximumAngle) &&
+        targetYawDegrees.isFinite && (-60...60).contains(targetYawDegrees) &&
         minimumBrightness.isFinite && maximumBrightness.isFinite &&
         (0...1).contains(minimumBrightness) &&
         maximumBrightness > minimumBrightness && maximumBrightness <= 1 &&
@@ -52,6 +58,16 @@ public struct CaptureConfiguration: Equatable {
         countdownDuration.isFinite && (1...5).contains(countdownDuration) &&
         jpegQuality.isFinite && (0.5...1).contains(jpegQuality) &&
         (maximumImageDimension == nil || (640...8192).contains(maximumImageDimension!))
+    }
+
+    /// 狀態燈與快門共用目標姿態判定，pitch／roll 仍以端正為目標。
+    func acceptsPose(yaw: Double?, roll: Double?, pitch: Double?) -> Bool {
+        guard let yaw, let roll, let pitch,
+              [yaw, roll, pitch].allSatisfy({ $0.isFinite }) else { return false }
+        let targetYaw = targetYawDegrees * .pi / 180
+        // 包含邊界；微小容差只消除度與弧度換算的浮點誤差。
+        let limit = maximumAngle + 1e-12
+        return abs(yaw - targetYaw) <= limit && abs(roll) <= limit && abs(pitch) <= limit
     }
 }
 

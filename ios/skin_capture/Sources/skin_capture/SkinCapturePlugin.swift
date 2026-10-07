@@ -44,6 +44,7 @@ public final class SkinCapturePlugin: NSObject, FlutterPlugin {
             minimumFaceHeight: number("minimumFaceHeight", 0.55),
             maximumFaceHeight: number("maximumFaceHeight", 0.80),
             centerTolerance: number("centerTolerance", 0.16), maximumAngle: number("maximumAngle", 0.30),
+            targetYawDegrees: number("targetYawDegrees", 0),
             minimumBrightness: number("minimumBrightness", 50 / 255),
             maximumBrightness: number("maximumBrightness", 170 / 255),
             stableDuration: number("stableDuration", 0.6), countdownDuration: number("countdownDuration", 1),

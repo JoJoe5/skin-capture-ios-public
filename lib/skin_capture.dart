@@ -8,6 +8,7 @@ class CaptureOptions {
     this.maximumFaceHeight = 0.80,
     this.centerTolerance = 0.16,
     this.maximumAngle = 0.30,
+    this.targetYawDegrees = 0,
     this.minimumBrightness = 50 / 255,
     this.maximumBrightness = 170 / 255,
     this.stableDuration = 0.6,
@@ -26,8 +27,12 @@ class CaptureOptions {
   final double maximumFaceHeight;
   final double centerTolerance;
 
-  /// 頭部角度門檻，單位為弧度。
+  /// yaw 與目標的偏差及 pitch／roll 上限，單位為弧度。
   final double maximumAngle;
+
+  /// 目標左右轉頭角度，單位為度；0 為正面，範圍 -60～60。
+  /// 正負沿用非鏡像影像的 Vision yaw，左右臉頰對應需實機校正。
+  final double targetYawDegrees;
   final double minimumBrightness;
   final double maximumBrightness;
   final double stableDuration;
@@ -50,6 +55,7 @@ class CaptureOptions {
         maximumFaceHeight <= minimumFaceHeight ||
         !inRange(centerTolerance, 0.01, 0.25) ||
         !inRange(maximumAngle, 0.05, 0.6) ||
+        !inRange(targetYawDegrees, -60, 60) ||
         !inRange(minimumBrightness, 0, 1) ||
         !inRange(maximumBrightness, minimumBrightness, 1) ||
         maximumBrightness <= minimumBrightness ||
@@ -70,6 +76,7 @@ class CaptureOptions {
       'maximumFaceHeight': maximumFaceHeight,
       'centerTolerance': centerTolerance,
       'maximumAngle': maximumAngle,
+      'targetYawDegrees': targetYawDegrees,
       'minimumBrightness': minimumBrightness,
       'maximumBrightness': maximumBrightness,
       'stableDuration': stableDuration,

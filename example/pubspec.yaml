@@ -1,6 +1,6 @@
 name: skin_capture_example
 description: 使用正式 Flutter plugin 的肌膚拍攝引導 Demo。
-version: 0.1.6+1
+version: 0.1.7+10
 publish_to: none
 environment:
   sdk: '>=3.4.0 <4.0.0'
