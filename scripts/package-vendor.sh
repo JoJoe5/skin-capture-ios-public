@@ -8,7 +8,7 @@ out="$root/build/vendor"
 stage="$out/skin_capture"
 zip_path="$out/skin_capture-$version.zip"
 
-if [ -n "$(git -C "$root" status --porcelain -- pubspec.yaml LICENSE CHANGELOG.md lib ios android docs/VENDOR.md)" ]; then
+if [ -n "$(git -C "$root" status --porcelain -- pubspec.yaml CHANGELOG.md lib ios android docs/VENDOR.md)" ]; then
   echo "交付內容有未提交的修改，請先提交再打包" >&2
   exit 1
 fi
@@ -18,15 +18,16 @@ mkdir -p "$stage"
 
 # 只取已提交內容，避免本機建置產物、金鑰或未提交修改混入交付包。
 git -C "$root" archive HEAD \
-  pubspec.yaml LICENSE CHANGELOG.md lib \
+  pubspec.yaml CHANGELOG.md lib \
   ios/skin_capture.podspec ios/skin_capture \
   android/build.gradle android/consumer-rules.pro android/src/main \
   | tar -x -C "$stage"
 git -C "$root" show HEAD:docs/VENDOR.md > "$stage/README.md"
 
-# 交付包不附原始碼 repository 位置。
+# 交付包不附原始碼 repository 位置；使用權由雙方合約約定，不附 LICENSE 檔。
 sed -i '/^repository:/d' "$stage/pubspec.yaml"
 sed -i \
+  -e "s|s.license = .*|s.license = { :type => 'Proprietary' }|" \
   -e "s|s.homepage = .*|s.homepage = 'http://example.com'|" \
   -e "s|s.author = .*|s.author = { 'skin_capture' => 'email@example.com' }|" \
   "$stage/ios/skin_capture.podspec"
