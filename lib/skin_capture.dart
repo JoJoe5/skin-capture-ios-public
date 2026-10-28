@@ -2,6 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /// 拍攝設定。亮度為臉部內縮區域的平均 Y 值，正規化為 0～1。
+///
+/// 門檻參數（臉大小、置中、角度、亮度、穩定與倒數時間）的預設值依肌膚檢測 API
+/// 的照片需求校正，**不建議修改**；放寬後照片可能仍能拍攝，但檢測結果會失準。
+/// App 一般只需調整外觀與文字：[accentColorArgb]、[title]、[confirmText]、
+/// [retakeText]、[guidanceMessages]。
 class CaptureOptions {
   const CaptureOptions({
     this.minimumFaceHeight = 0.55,
@@ -23,6 +28,8 @@ class CaptureOptions {
   });
 
   /// 偵測臉框在預覽中的高度占橢圓引導框高度的比例。
+  ///
+  /// 以下至 [countdownDuration] 為拍攝門檻，不建議修改，理由見 [CaptureOptions]。
   final double minimumFaceHeight;
   final double maximumFaceHeight;
   final double centerTolerance;
@@ -38,7 +45,7 @@ class CaptureOptions {
   final double stableDuration;
   final double countdownDuration;
 
-  /// null 保留原解析度；有設定則只縮小、不放大。
+  /// null 保留原解析度；有設定則只縮小、不放大。需符合檢測 API 的照片大小限制。
   final int? maximumImageDimension;
   final double jpegQuality;
   final int accentColorArgb;

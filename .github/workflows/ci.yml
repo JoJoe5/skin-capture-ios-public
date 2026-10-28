@@ -13,7 +13,8 @@ concurrency:
 jobs:
   android-demo:
     name: Android 原生測試與 Demo APK
-    runs-on: ubuntu-latest
+    # 固定映像檔版本並使用其內建 Android SDK，避免第三方安裝步驟與映像檔升級造成建置中斷。
+    runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
@@ -21,12 +22,13 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-      - uses: android-actions/setup-android@v3
       - name: 準備 Flutter 3.47.6 與 Android SDK
         run: |
           git clone --depth 1 --branch 3.47.6 https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
           echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
-          sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;28.2.13676358"
+          SDKMANAGER="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKMANAGER" --licenses > /dev/null || true
+          "$SDKMANAGER" "platforms;android-36" "build-tools;36.0.0" "ndk;28.2.13676358"
       - name: Flutter 分析、格式與測試
         run: |
           flutter pub get

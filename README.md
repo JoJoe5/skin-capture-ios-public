@@ -58,7 +58,7 @@ try {
 }
 ```
 
-詳細設定與錯誤碼見 [串接文件](docs/INTEGRATION.md)。
+詳細設定與錯誤碼見 [串接文件](docs/INTEGRATION.md)。交付給外部廠商時，提供精簡的 [廠商串接指南](docs/VENDOR.md)。
 
 ## Demo 與建置
 
