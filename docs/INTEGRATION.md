@@ -2,7 +2,7 @@
 
 ## 介面與生命週期
 
-本版串接環境為 Flutter 3.47.6 以上、iOS 16 以上、iPhone。CI 驗證版本固定為 Flutter 3.47.6；App 團隊若使用較舊 Flutter，需先提供版本並完成橋接適配與建置驗證。
+本版串接環境為 Flutter 3.47.6 以上、iPhone 的 iOS 16 以上，或 Android 7.0（API 24）以上。兩個平台共用同一個 Flutter 套件與下列介面；Android 的 CameraX／ML Kit 實作、權限、建置及差異詳見 [Android 文件](ANDROID.md)。以下 Vision 信心與區域追蹤說明僅適用 iOS。CI 驗證版本固定為 Flutter 3.47.6；App 團隊若使用較舊 Flutter，需先提供版本並完成橋接適配與建置驗證。
 
 Flutter 呼叫 `SkinCapture().capture(options: ...)`，SDK 以全螢幕原生畫面管理相機與確認流程。
 
@@ -99,16 +99,16 @@ final photo = await SkinCapture().capture(
 | 錯誤碼 | 意義與建議 |
 |---|---|
 | permission_denied | 相機權限拒絕；SDK 提供開啟設定與重試 |
-| camera_unavailable | 無可用前置相機；改用實體 iPhone |
+| camera_unavailable | 無可用前置相機；改用有前置相機的實體手機 |
 | camera_interrupted | 相機中斷；SDK 提供重試 |
-| analysis_failed | Vision 分析失敗；SDK 提供重試 |
+| analysis_failed | Vision 或 ML Kit 分析失敗；SDK 提供重試 |
 | photo_failed | 拍照或 JPEG 轉換失敗；SDK 提供重試 |
 | configuration_failed | 相機設定失敗 |
 | invalid_configuration | 參數不合法；Dart 端通常先拋出 ArgumentError |
-| missing_camera_usage_description | App 缺少相機用途說明 |
+| missing_camera_usage_description | iOS App 缺少相機用途說明 |
 | capture_in_progress | 不可同時開啟兩個拍攝流程 |
 | no_presenter／presentation_busy | Flutter 畫面尚未可顯示或正在切換 |
-| unsupported_platform／unsupported_device | 非 iOS 或非 iPhone |
+| unsupported_platform／unsupported_device | 非 iOS／Android、iOS 裝置非 iPhone，或 Android 無法以直立畫面拍攝 |
 | plugin_unavailable | 未完成註冊或 plugin 已卸載 |
 | invalid_result | 原生結果欄位缺失或不合法 |
 

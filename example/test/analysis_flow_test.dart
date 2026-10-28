@@ -260,7 +260,9 @@ void main() {
     expect(find.text('送出肌膚檢測'), findsNothing);
     expect(find.text('預覽範例報告'), findsNothing);
     expect(find.byTooltip('檢測連線設定'), findsNothing);
-  }, variant: TargetPlatformVariant({TargetPlatform.iOS}));
+  },
+      variant:
+          TargetPlatformVariant({TargetPlatform.iOS, TargetPlatform.android}));
 
   testWidgets('打開開關才出現送出入口，關掉後入口消失', (tester) async {
     await tester.binding.setSurfaceSize(const Size(400, 2400));
@@ -278,7 +280,9 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('callApiSwitch')));
     await tester.pumpAndSettle();
     expect(find.text('送出肌膚檢測'), findsNothing);
-  }, variant: TargetPlatformVariant({TargetPlatform.iOS}));
+  },
+      variant:
+          TargetPlatformVariant({TargetPlatform.iOS, TargetPlatform.android}));
 
   testWidgets('開關打開但尚未設定網址：不送出，並提示先完成設定', (tester) async {
     await tester.binding.setSurfaceSize(const Size(400, 2400));
@@ -297,7 +301,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('請先完成檢測連線設定'), findsOneWidget);
     expect(find.text('肌膚檢測'), findsNothing); // 沒有進入分析頁
-  }, variant: TargetPlatformVariant({TargetPlatform.iOS}));
+  },
+      variant:
+          TargetPlatformVariant({TargetPlatform.iOS, TargetPlatform.android}));
 
   testWidgets('首頁可預覽範例報告', (tester) async {
     await tester.pumpWidget(const SkinCaptureDemo());

@@ -1,0 +1,30 @@
+# 記錄 Flutter 工程版本與能力。
+# Flutter 工具使用此檔案判斷能力與執行遷移。
+#
+# 此檔案由 Flutter 產生並納入版本控制；不手動更動遷移欄位。
+
+version:
+  revision: "5fc346839b5d0eef006ed8404392afb4dfae428d"
+  channel: "[user-branch]"
+
+project_type: app
+
+# 記錄 Flutter 遷移命令的中繼資料。
+migration:
+  platforms:
+    - platform: root
+      create_revision: 5fc346839b5d0eef006ed8404392afb4dfae428d
+      base_revision: 5fc346839b5d0eef006ed8404392afb4dfae428d
+    - platform: android
+      create_revision: 5fc346839b5d0eef006ed8404392afb4dfae428d
+      base_revision: 5fc346839b5d0eef006ed8404392afb4dfae428d
+
+  # 使用者提供的設定。
+
+  # 列出遷移工具應忽略的本機相對路徑。
+
+  #
+  # 非範本檔案預設由遷移工具忽略。
+  unmanaged_files:
+    - 'lib/main.dart'
+    - 'ios/Runner.xcodeproj/project.pbxproj'

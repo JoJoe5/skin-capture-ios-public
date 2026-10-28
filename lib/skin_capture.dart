@@ -31,7 +31,7 @@ class CaptureOptions {
   final double maximumAngle;
 
   /// 目標左右轉頭角度，單位為度；0 為正面，範圍 -60～60。
-  /// 正負沿用非鏡像影像的 Vision yaw，左右臉頰對應需實機校正。
+  /// 正負使用各平台非鏡像影像的 yaw；左右臉頰對應需各平台實機校正。
   final double targetYawDegrees;
   final double minimumBrightness;
   final double maximumBrightness;
@@ -142,10 +142,12 @@ class SkinCapture {
   Future<CaptureResult?> capture({
     CaptureOptions options = const CaptureOptions(),
   }) async {
-    if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) {
+    if (kIsWeb ||
+        (defaultTargetPlatform != TargetPlatform.iOS &&
+            defaultTargetPlatform != TargetPlatform.android)) {
       throw const SkinCaptureException(
         'unsupported_platform',
-        '目前僅支援 iPhone 的 iOS App',
+        '目前支援 iPhone 與 Android App',
       );
     }
     final arguments = options.toMap();
@@ -164,7 +166,7 @@ class SkinCapture {
     } on MissingPluginException {
       throw const SkinCaptureException(
         'plugin_unavailable',
-        '請確認 iOS plugin 已完成註冊',
+        '請確認 skin_capture 原生 plugin 已完成註冊',
       );
     } finally {
       _busy = false;

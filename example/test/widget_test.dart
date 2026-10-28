@@ -27,7 +27,9 @@ void main() {
     expect(calls, 1);
     expect(find.text('已取消拍攝'), findsOneWidget);
     expect(find.text('開始拍攝'), findsOneWidget);
-  }, variant: TargetPlatformVariant({TargetPlatform.iOS}));
+  },
+      variant:
+          TargetPlatformVariant({TargetPlatform.iOS, TargetPlatform.android}));
 
   testWidgets('相機錯誤可讀，使用者可以再次拍攝', (tester) async {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -42,7 +44,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('請允許相機權限'), findsOneWidget);
     expect(find.text('開始拍攝'), findsOneWidget);
-  }, variant: TargetPlatformVariant({TargetPlatform.iOS}));
+  },
+      variant:
+          TargetPlatformVariant({TargetPlatform.iOS, TargetPlatform.android}));
 
   testWidgets('小螢幕套用大小範圍後，下一次拍攝使用新的設定', (tester) async {
     await tester.binding.setSurfaceSize(const Size(375, 667));
@@ -72,7 +76,9 @@ void main() {
     expect(capturedOptions!['maximumFaceHeight'], 0.75);
     expect(capturedOptions!['minimumBrightness'], closeTo(50 / 255, 0.0001));
     expect(tester.takeException(), isNull);
-  }, variant: TargetPlatformVariant({TargetPlatform.iOS}));
+  },
+      variant:
+          TargetPlatformVariant({TargetPlatform.iOS, TargetPlatform.android}));
 
   testWidgets('取消設定不保存變更，範圍相等時不能套用', (tester) async {
     await tester.pumpWidget(const SkinCaptureDemo());
@@ -100,7 +106,9 @@ void main() {
         const RangeValues(55, 80));
     Navigator.of(tester.element(find.byType(RangeSlider))).pop();
     await tester.pumpAndSettle();
-  }, variant: TargetPlatformVariant({TargetPlatform.iOS}));
+  },
+      variant:
+          TargetPlatformVariant({TargetPlatform.iOS, TargetPlatform.android}));
 
   testWidgets('恢復預設一起還原臉大小與亮度，套用後回傳正確參數', (tester) async {
     Map<Object?, Object?>? capturedOptions;
@@ -156,7 +164,9 @@ void main() {
     expect(capturedOptions!['maximumBrightness'], closeTo(170 / 255, 0.0001));
     expect(capturedOptions!['targetYawDegrees'], 0);
     expect(capturedOptions!['maximumAngle'], closeTo(0.3, 0.000001));
-  }, variant: TargetPlatformVariant({TargetPlatform.iOS}));
+  },
+      variant:
+          TargetPlatformVariant({TargetPlatform.iOS, TargetPlatform.android}));
 
   testWidgets('小螢幕套用正負 45 度及自訂角度，下一次拍攝使用目標', (tester) async {
     await tester.binding.setSurfaceSize(const Size(375, 667));
@@ -196,5 +206,7 @@ void main() {
       expect(capturedOptions!['title'], '側臉拍攝');
       expect(tester.takeException(), isNull);
     }
-  }, variant: TargetPlatformVariant({TargetPlatform.iOS}));
+  },
+      variant:
+          TargetPlatformVariant({TargetPlatform.iOS, TargetPlatform.android}));
 }

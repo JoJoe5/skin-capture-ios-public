@@ -114,8 +114,46 @@ void main() {
     );
   });
 
-  test('非 iOS 平台不嘗試原生呼叫', () async {
+  test('Android 使用相同原生介面回傳照片與取消', () async {
     debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    messenger.setMockMethodCallHandler(channel, (call) async {
+      expect(call.method, 'capture');
+      expect(call.arguments['targetYawDegrees'], -45);
+      return photo();
+    });
+    final result = await SkinCapture().capture(
+      options: const CaptureOptions(targetYawDegrees: -45),
+    );
+    expect(result!.width, 1200);
+    expect(result.jpegBytes, photo()['jpegBytes']);
+    messenger.setMockMethodCallHandler(channel, (_) async => null);
+    expect(await SkinCapture().capture(), isNull);
+  });
+
+  test('Android 權限錯誤與重複拍攝維持相同合約', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    messenger.setMockMethodCallHandler(channel, (_) async {
+      throw PlatformException(code: 'permission_denied');
+    });
+    await expectLater(
+      SkinCapture().capture(),
+      throwsA(isA<SkinCaptureException>()
+          .having((e) => e.code, 'code', 'permission_denied')),
+    );
+    final pending = Completer<Object?>();
+    messenger.setMockMethodCallHandler(channel, (_) => pending.future);
+    final first = SkinCapture().capture();
+    await expectLater(
+      SkinCapture().capture(),
+      throwsA(isA<SkinCaptureException>()
+          .having((e) => e.code, 'code', 'capture_in_progress')),
+    );
+    pending.complete(null);
+    expect(await first, isNull);
+  });
+
+  test('桌面平台不嘗試原生呼叫', () async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.windows;
     await expectLater(
       SkinCapture().capture(),
       throwsA(

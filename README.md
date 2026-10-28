@@ -1,15 +1,17 @@
 # 肌膚拍攝引導 SDK
 
-供 Flutter App 使用的 iPhone 相機 SDK，預設正臉，可設定目標左右轉頭角度。提供原生拍攝 UI、位置／距離／姿勢／穩定度／基本亮度引導、自動拍照，以及使用者確認後的 JPEG 回傳。
+供 Flutter App 使用的 iOS／Android 相機 SDK，預設正臉，可設定目標左右轉頭角度。提供原生拍攝 UI、位置／距離／姿勢／穩定度／基本亮度引導、自動拍照，以及使用者確認後的 JPEG 回傳。
+
+兩個平台使用同一個 `skin_capture` Flutter 套件、`SkinCapture().capture()`、設定與回傳格式；建置時自動選用 Swift 或 Kotlin 原生實作。現有 repository 名稱暫時保留，套件名稱與 import 不變。Android 串接、建置與平台差異見 [Android 文件](docs/ANDROID.md)。
 
 ## 第一版範圍
 
-- iPhone、iOS 16 以上、直立、前置相機，每次一張；預設正臉，`targetYawDegrees` 可設定 −60～60 度，側臉辨識效果與左右臉頰對應待實機驗收。
+- iPhone、iOS 16 以上，以及 Android 7.0（API 24）以上的 Flutter App；直立、前置相機，每次一張。預設正臉，`targetYawDegrees` 可設定 −60～60 度，側臉辨識效果與左右臉頰對應需各平台實機驗收。
 - 黑底、大橢圓相機預覽，上方同時呈現「光線、臉角度、臉大小」三項狀態，底部提供雙行調整提示；本版不提供語音。
 - 三項合格且穩定 0.6 秒後，倒數 1 秒自動拍照。狀態顏色為綠色符合、紅色需調整、灰色等待辨識；角度欄也包含置中。
 - 臉大小的預設合格範圍為偵測臉框在預覽中的高度占橢圓框高度 55～80%，包含上下限；低於 55% 提示靠近，高於 80% 提示遠離。
 - 預覽縮放固定，不隨大小門檻變動；畫面以「近一點／遠一點」引導；回傳照片仍保留完整影像。
-- 轉頭時保留可用觀測，偵測短暫中斷可追蹤區域最多 2 秒，光線與大小使用當下影像；姿態未確認前禁止拍照。灰燈附「待辨識」，與紅燈「需調整」分開說明。
+- iOS 轉頭時保留可用觀測，偵測短暫中斷可追蹤區域最多 2 秒；Android 使用當下 ML Kit 偵測，無臉時立即重置，不沿用舊位置。灰燈附「待辨識」，與紅燈「需調整」分開說明。
 - 輕微晃動容差為影像比例 0.05；位置、距離、角度或亮度短暫失效時暫停倒數，0.35 秒內恢復可接續。持續失效、無臉、多人或影像中斷時重新開始；暫停期間不拍照。
 - 照片確認與重拍；只有確認後才回傳資料給 App。
 - 相機預覽為自拍鏡像；輸出為正向、不鏡像的完整照片，不加入美肌與濾鏡。
@@ -20,7 +22,7 @@
 
 公開後，App 團隊可直接取得此 repo；使用與交付權利依專案授權條款。在 `pubspec.yaml` 加入：
 
-本版最低 Flutter 版本為 3.47.6，使用該版本的 registrar 控制器介面，並已由 CI 驗證；iOS 最低版本為 16.0。較舊 Flutter 版本需先調整與驗證原生橋接，不能直接套用本版的相容性宣告。
+本版最低 Flutter 版本為 3.47.6；iOS 最低版本為 16.0，Android Demo 最低 API 24。較舊 Flutter 版本需先調整與驗證原生橋接，不能直接套用本版的相容性宣告。
 
 ```yaml
 dependencies:
@@ -31,6 +33,8 @@ dependencies:
 ```
 
 在 iOS App 的 `Info.plist` 加入 `NSCameraUsageDescription`，並將 iOS 最低版本設為 16.0。若使用 CocoaPods，也將 `Podfile` 的 `platform :ios` 設為 `'16.0'`。
+
+Android 相機權限與原生拍攝 Activity 由 plugin manifest 合併；App 設定 `minSdk >= 24`，使用 JDK 17 與 Android SDK 36。SDK 不需要相簿或麥克風權限；ML Kit 傳遞相依會合併網路權限，Demo 的選用 API 功能也使用網路，詳見 Android 文件。
 
 ```dart
 import 'package:skin_capture/skin_capture.dart';
@@ -67,7 +71,7 @@ flutter pub get
 flutter run
 ```
 
-拍攝需使用實體 iPhone；模擬器可驗證 App 啟動、Flutter 串接與無相機錯誤處理。Demo 首頁顯示目前臉大小範圍，點「調整」或右上「拍攝設定」可微調：
+拍攝需使用實體 iPhone 或 Android 手機；模擬器可驗證 App 啟動、Flutter 串接與無相機錯誤處理。Android 可在 Windows、Linux 或 macOS 執行 `cd example` 後用 `flutter build apk --debug` 產生可安裝 Demo。Demo 首頁顯示目前臉大小範圍，點「調整」或右上「拍攝設定」可微調：
 
 - 「臉在框內的大小」預設 55～80%，雙端滑桿可在 40～90% 內每次調整 1%。下限調小可離鏡頭更遠，上限調大允許靠得更近。
 - 亮度上下限維持可調；大小或亮度下限不小於上限時，不能套用。
@@ -76,6 +80,8 @@ flutter run
 - 微調值保留在本次 App 開啟期間；重新啟動回到 SDK 預設值，預覽縮放不隨微調改變。
 
 GitHub Actions 的 `ci.yml` 會執行 Flutter 靜態分析與測試、Swift 核心測試、iOS XCTest、iPhone 與模擬器 App 建置，並產出原生 `SkinCaptureSDK.xcframework.zip`。
+
+另以 Linux job 建置 Android Demo APK、執行 Kotlin／Robolectric 核心與照片測試、Android Lint，並保存測試報告。CI 建置不代表 Android 實機相機驗收通過。
 
 模擬器啟動與截圖另設 5 分鐘上限；虛擬環境逾時時會保留警告，繼續上傳已完成編譯的 App。此情況不代表啟動檢查通過，實際拍攝仍需用 iPhone 驗收。
 
@@ -94,7 +100,7 @@ TestFlight 安裝步驟與 CI 簽章設定見 [Demo 發佈文件](docs/TESTFLIGH
 
 ## 原生 SDK 與測試
 
-原生唯一來源位於 `ios/skin_capture/Sources/SkinCaptureSDK`。根目錄 `Package.swift` 供原生 SwiftPM 使用；Flutter 的 SwiftPM 與 CocoaPods 使用相同原始碼。
+iOS 原生唯一來源位於 `ios/skin_capture/Sources/SkinCaptureSDK`。根目錄 `Package.swift` 供原生 SwiftPM 使用；Flutter 的 SwiftPM 與 CocoaPods 使用相同原始碼。Android 原生唯一來源位於 `android/src/main/kotlin/com/skincapture/skin_capture`，Flutter Demo 直接使用此 plugin。
 
 ```bash
 flutter analyze

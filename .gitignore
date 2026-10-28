@@ -33,3 +33,8 @@ example/ios/Runner/GeneratedPluginRegistrant.*
 **/xcuserdata/
 __pycache__/
 *.pyc
+.gradle/
+**/local.properties
+*.jks
+*.keystore
+**/key.properties

@@ -1,5 +1,5 @@
 name: skin_capture
-description: iPhone 正臉相機拍攝引導，提供原生 UI、自動拍照與 JPEG 回傳。
+description: iOS 與 Android 肌膚相機拍攝引導，提供原生 UI、自動拍照與 JPEG 回傳。
 version: 0.1.8
 publish_to: none
 repository: https://github.com/JoJoe5/skin-capture-ios-public
@@ -16,5 +16,8 @@ dev_dependencies:
 flutter:
   plugin:
     platforms:
+      android:
+        package: com.skincapture.skin_capture
+        pluginClass: SkinCapturePlugin
       ios:
         pluginClass: SkinCapturePlugin
