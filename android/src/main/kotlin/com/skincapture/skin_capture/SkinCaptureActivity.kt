@@ -62,7 +62,7 @@ class SkinCaptureActivity : ComponentActivity() {
     private lateinit var root: LinearLayout
     private lateinit var guide: CapturePreviewView
     private lateinit var hint: TextView
-    private lateinit var statusViews: List<TextView>
+    private lateinit var qualityView: CaptureQualityView
     private var foreground = false
     private var startingCamera = false
     private var takingPhoto = false
@@ -118,13 +118,8 @@ class SkinCaptureActivity : ComponentActivity() {
     private fun showCameraUi() {
         root = column()
         root.addView(header(config.title))
-        val statuses = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        statusViews = listOf("光線", "臉角度", "臉大小").map { name ->
-            label(name, 16f).apply { minHeight = dp(94) }.also {
-                statuses.addView(it, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
-            }
-        }
-        root.addView(statuses)
+        qualityView = CaptureQualityView(this)
+        root.addView(qualityView)
         guide = CapturePreviewView(this, config.accentColorArgb)
         root.addView(guide, LinearLayout.LayoutParams(-1, 0, 1f))
         hint = label("請將臉部放入框內", 20f).apply { minHeight = dp(90) }
@@ -276,24 +271,8 @@ class SkinCaptureActivity : ComponentActivity() {
     }
 
     private fun renderEvaluation() {
-        if (!::statusViews.isInitialized || photo != null || error != null) return
-        val states = listOf(evaluation.quality.lighting, evaluation.quality.angle, evaluation.quality.size)
-        listOf("光線", "臉角度", "臉大小").forEachIndexed { index, name ->
-            val state = states[index]
-            val description = when (state) {
-                QualityState.UNKNOWN -> "待辨識"
-                QualityState.PASSED -> "符合"
-                QualityState.FAILED -> "需調整"
-            }
-            val angle = if (index == 1) evaluation.yawDegrees?.let { "\n目前 ${it.toInt()}°／目標 ${config.targetYawDegrees.toInt()}°" }
-                ?: "\n角度待辨識" else ""
-            statusViews[index].text = "$name\n$description$angle"
-            statusViews[index].setTextColor(when (state) {
-                QualityState.UNKNOWN -> Color.LTGRAY
-                QualityState.PASSED -> Color.rgb(83, 213, 152)
-                QualityState.FAILED -> Color.rgb(255, 113, 113)
-            })
-        }
+        if (!::qualityView.isInitialized || photo != null || error != null) return
+        qualityView.update(evaluation.quality, evaluation.yawDegrees, config.targetYawDegrees)
         val reason = evaluation.blockingGuidance ?: evaluation.guidance
         val remaining = countdown.remaining(now(), config.countdownDuration)
         hint.text = when {

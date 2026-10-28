@@ -46,6 +46,22 @@ class CaptureInterfaceTest {
         } finally { controller.destroy(); CaptureSessions.remove(sessionId) }
     }
 
+    @Test fun `狀態圖示依結果變色且角度欄顯示目前角度`() {
+        val view = CaptureQualityView(RuntimeEnvironment.getApplication())
+        view.update(CaptureQuality(QualityState.PASSED, QualityState.FAILED, QualityState.UNKNOWN), 12.4, -45.0)
+        assertEquals(QualityIconView.PASSED_COLOR, view.lighting.iconView.circleColor)
+        assertEquals("符合", view.lighting.statusLabel.text)
+        assertEquals(QualityIconView.FAILED_COLOR, view.angle.iconView.circleColor)
+        assertEquals("臉角度 +12°", view.angle.label.text)
+        assertEquals("需調整", view.angle.statusLabel.text)
+        assertTrue(view.angle.contentDescription.contains("目標 -45 度"))
+        assertEquals(QualityIconView.UNKNOWN_COLOR, view.size.iconView.circleColor)
+
+        view.update(CaptureQuality(QualityState.UNKNOWN, QualityState.UNKNOWN, QualityState.UNKNOWN), null, 0.0)
+        assertEquals("臉角度", view.angle.label.text)
+        assertEquals("角度待辨識", view.angle.statusLabel.text)
+    }
+
     @Test fun `三種手機尺寸可顯示提示狀態與取消按鈕`() {
         for ((width, height) in listOf(360 to 640, 393 to 852, 480 to 960)) {
             val sessionId = CaptureSessions.create(CaptureConfiguration())
@@ -66,6 +82,9 @@ class CaptureInterfaceTest {
                 assertTrue(cancel.top >= 0 && cancel.bottom <= height)
                 assertTrue(views.filterIsInstance<TextView>().any { it.text.contains("請將臉部放入框內") })
                 assertEquals(3, views.filterIsInstance<TextView>().count { it.text.contains("待辨識") })
+                val icons = views.filterIsInstance<QualityIconView>()
+                assertEquals(3, icons.size)
+                assertTrue(icons.all { it.width == it.height && it.width > 0 && it.bottom > 0 })
                 assertTrue(views.filterIsInstance<CapturePreviewView>().single().height >= 200)
                 val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
                 root.draw(Canvas(bitmap))

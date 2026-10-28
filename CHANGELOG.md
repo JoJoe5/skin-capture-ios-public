@@ -5,6 +5,7 @@
 - 同一個 `skin_capture` Flutter 套件新增 Android 原生實作與 Demo 工程，沿用拍攝設定、錯誤碼、確認取消及 JPEG 回傳格式。
 - Android 使用 CameraX 與內建 ML Kit 人臉模型，提供橢圓鏡像預覽、三項狀態、目標角度、穩定與倒數、確認重拍、相機權限及中斷處理；照片只存在記憶體。
 - 新增 Android 核心／亮度／照片／plugin 生命週期測試，Demo 測試涵蓋 iOS 與 Android，CI 新增 APK、原生測試與 Lint；實機辨識、方向與亮度門檻仍須驗收。
+- Android 光線／臉角度／臉大小改用與 iOS 相同的圓形狀態圖示（灰色待辨識、綠色符合、紅色需調整），角度欄顯示目前角度，讓兩平台引導畫面一致。
 
 - Demo 新增肌膚檢測 POC：拍照後可上傳到 skin-analytics 的同步測試端點 `POST /poc/skin-analysis`，並以報告畫面顯示整體分數、摘要與六項分數；SDK 與 plugin 仍不呼叫檢測 API，上傳只在 Demo 內。
 - 首頁新增「呼叫檢測 API」開關，預設關閉；關閉時維持原本只測相機引導的行為，打開後才顯示送出入口與連線設定，且仍需按鈕確認才會上傳。
