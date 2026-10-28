@@ -1,6 +1,6 @@
 name: skin_capture
 description: iOS 與 Android 肌膚相機拍攝引導，提供原生 UI、自動拍照與 JPEG 回傳。
-version: 0.1.8
+version: 0.2.0
 publish_to: none
 repository: https://github.com/JoJoe5/skin-capture-ios-public
 environment:

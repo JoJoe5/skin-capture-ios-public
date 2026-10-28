@@ -2,7 +2,7 @@
 
 本 SDK 是 Flutter 套件 `skin_capture`，同一套程式碼支援 iPhone 與 Android：開啟全螢幕原生相機畫面，引導使用者對準、在光線與角度合格後自動拍照，使用者確認後回傳 JPEG。SDK 不上傳照片、不呼叫檢測 API；拿到照片後由 App 自行上傳。
 
-更完整的判定規則與平台差異見 [串接文件](INTEGRATION.md) 與 [Android 文件](ANDROID.md)。
+完整的判定規則與平台差異見另附的 SDK 規格書。
 
 ## 環境需求
 
@@ -15,15 +15,18 @@
 
 ## 安裝
 
-`pubspec.yaml`：
+SDK 以 `skin_capture-<版本>.zip` 交付，解壓縮後是一個 `skin_capture` 資料夾。
 
-```yaml
-dependencies:
-  skin_capture:
-    git:
-      url: https://github.com/JoJoe5/skin-capture-ios-public.git
-      ref: <版本標籤> # 例如 v0.2.0，請固定使用交付時通知的標籤，不要用 main
-```
+1. 將 `skin_capture` 資料夾放進 App 專案，例如 `packages/skin_capture`，並一起納入 App 的版本控制。
+2. App 的 `pubspec.yaml` 以路徑引用：
+
+    ```yaml
+    dependencies:
+      skin_capture:
+        path: packages/skin_capture
+    ```
+
+3. 執行 `flutter pub get`。
 
 iOS：
 
@@ -132,5 +135,6 @@ App 上傳照片到檢測服務屬於 App 的行為，需由 App 自行申報。
 
 ## 版本與回報
 
-- 版本以 git 標籤發布，變更內容見 [CHANGELOG](../CHANGELOG.md)。升級前請閱讀該版本的變更說明。
-- 回報問題時請提供 SDK 版本標籤、機型、系統版本、錯誤碼與重現步驟。
+- 每個版本以新的 zip 交付，變更內容見套件內的 `CHANGELOG.md`。升級時以新版 `skin_capture` 資料夾整個取代舊版，不要只覆蓋部分檔案，以免殘留已移除的檔案。
+- 請勿修改套件內的程式；需要調整時回報給我們，避免後續升級時遺失修改。
+- 回報問題時請提供 SDK 版本、機型、系統版本、錯誤碼與重現步驟。
